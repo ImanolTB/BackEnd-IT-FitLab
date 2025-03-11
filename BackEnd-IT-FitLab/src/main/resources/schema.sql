@@ -1,18 +1,18 @@
 
--- 1. CREACIÓN DE LA BASE DE DATOS (opcional)
+
 
 CREATE DATABASE IF NOT EXISTS IT_FitLab;
 USE IT_FitLab;
 
 
---2. Tabla roles
+--1. Tabla roles
 
 CREATE TABLE IF NOT EXISTS roles (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(50) UNIQUE NOT NULL
 );
 
--- 3. Tabla users
+-- 2. Tabla users
 
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
   activity_level ENUM('sedentario','ligero','moderado','activo','muy_activo')
 );
 
--- 4. Tabla UserRole
+-- 3. Tabla UserRole
 
 CREATE TABLE IF NOT EXISTS user_roles (
   user_id BIGINT NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
   FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
--- 5. TABLA Alimento
+-- 4. TABLA Alimento
 
 CREATE TABLE IF NOT EXISTS food (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS food (
   fats DECIMAL(5,2)
 );
 
--- 6. TABLA Dieta
+-- 5. TABLA Dieta
 
 CREATE TABLE IF NOT EXISTS diets (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS diets (
   ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- 7. TABLA Dieta_Alimento
+-- 6. Tabla Dieta_Alimento
 
 CREATE TABLE IF NOT EXISTS diet_food (
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS diet_food (
   ON DELETE CASCADE ON UPDATE CASCADE
 ) ;
 
--- 8. TABLA Programa_Entrenamiento
+-- 7. TABLA Programa_Entrenamiento
 
 CREATE TABLE IF NOT EXISTS training_programmes (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS training_programmes (
 );
 
 
--- 9. TABLA Entrenamiento
+-- 8. TABLA Entrenamiento
 
 CREATE TABLE IF NOT EXISTS workouts (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS workouts (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ;
 
--- 10. TABLA Ejercicio
+-- 9. TABLA Ejercicio
 
 CREATE TABLE IF NOT EXISTS exercises (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   muscle_group ENUM('pectoral', 'espalda', 'hombro', 'brazo', 'pierna')
 );
 
--- 11. TABLA Entrenamiento_Ejercicio
+-- 10. TABLA Entrenamiento_Ejercicio
 
 CREATE TABLE IF NOT EXISTS workout_exercises (
   workout_id INT NOT NULL,
