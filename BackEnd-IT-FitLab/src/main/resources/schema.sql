@@ -7,36 +7,36 @@ USE IT_FitLab;
 
 --1. Tabla roles
 
-CREATE TABLE IF NOT EXISTS roles (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(50) UNIQUE NOT NULL
-);
+--CREATE TABLE IF NOT EXISTS roles (
+ -- id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ -- name VARCHAR(50) UNIQUE NOT NULL
+--);
 
 -- 2. Tabla users
 
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(50) UNIQUE NOT NULL,
-  password VARCHAR(100) NOT NULL,
+username VARCHAR(50) UNIQUE NOT NULL,
+ password VARCHAR(100) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   name VARCHAR(100),
   last_name VARCHAR(100),
-  age INT,
+ age INT,
   height DECIMAL(5,2),
-  weight DECIMAL(5,2),
+ weight DECIMAL(5,2),
   gender ENUM('M','F'),
-  activity_level ENUM('sedentario','ligero','moderado','activo','muy_activo')
+  activity_level ENUM('SEDENTARIO','LIGERO','MODERADO','ACTIVO','MUY_ACTIVO')
 );
 
 -- 3. Tabla UserRole
 
-CREATE TABLE IF NOT EXISTS user_roles (
-  user_id BIGINT NOT NULL,
-  role_id BIGINT NOT NULL,
-  PRIMARY KEY (user_id, role_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-);
+--CREATE TABLE IF NOT EXISTS user_roles (
+ -- user_id BIGINT NOT NULL,
+ -- role_id BIGINT NOT NULL,
+ -- PRIMARY KEY (user_id, role_id),
+ -- FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+ -- FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+--);
 
 -- 4. TABLA Alimento
 
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS diet_food (
   diet_id INT NOT NULL,
   food_id INT NOT NULL,
   quantity DECIMAL(5,2),
-  day_week ENUM('Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'),
-  meal_type ENUM('Desayuno','Almuerzo','Merienda','Cena','Snack'),
+  day_week ENUM('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'),
+  meal_type ENUM('DESAYUNO','ALMUERZO','MERIENDA','CENA','SNACK'),
   PRIMARY KEY(diet_id, food_id, day_week, meal_type),
   FOREIGN KEY (diet_id) REFERENCES diets(id)
   ON DELETE CASCADE ON UPDATE CASCADE,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   video_url VARCHAR(255),
-  muscle_group ENUM('pectoral', 'espalda', 'hombro', 'brazo', 'pierna')
+  muscle_group ENUM('PECTORAL', 'ESPALDA', 'HOMBRO', 'BRAZO', 'PIERNA')
 );
 
 -- 10. TABLA Entrenamiento_Ejercicio
