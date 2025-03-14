@@ -1,7 +1,12 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietFoodDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.DietFoodService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,18 +16,70 @@ import java.util.List;
 @RequestMapping("/api/dietfood")
 public class DietFoodController {
 
-    private final DietFoodService dietFoodService;
+    private static final Logger logger = LoggerFactory.getLogger(DietFoodController.class);
 
-    public DietFoodController(DietFoodService dietFoodService) {
-        this.dietFoodService = dietFoodService;
+    @Autowired
+    private  DietFoodService dietFoodService;
+
+
+    /**
+     * Añadir un alimento a una dieta en un día y comida específicos.
+     */
+    @PostMapping
+    public ResponseEntity<?> addFoodToDiet(@RequestBody DietFoodDTO dto) {
+        logger.info("Intentando añadir alimento a la dieta: {}", dto);
+        try {
+            DietFoodDTO savedDietFood = dietFoodService.addFoodToDiet(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDietFood);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Datos inválidos al añadir alimento a la dieta: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error inesperado al añadir alimento a la dieta: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al añadir alimento.");
+        }
     }
 
     /**
-     * Obtener los alimentos de una dieta para un día específico.
+     * Eliminar un alimento de una dieta para un día y tipo de comida específicos.
      */
-    @GetMapping("/{dietId}/day/{dayWeek}")
-    public ResponseEntity<List<DietFoodDTO>> getFoodsByDayOfTheWeek(@PathVariable Long dietId,
-                                                                    @PathVariable String dayWeek) {
-        return ResponseEntity.ok(dietFoodService.getFoodsByDayOfTheWeek(dietId, dayWeek));
+    @DeleteMapping("/{dietId}/{foodId}")
+    public ResponseEntity<?> removeFoodFromDiet(@RequestBody DietFoodDTO dto) {
+        logger.info("Intentando eliminar alimento {} de la dieta {} para {} - {}", dto.getFoodId(), dto.getDietId(), dto.getDayWeek(), dto.getMealType());
+        try {
+            dietFoodService.removeFoodFromDiet(dto);
+            return ResponseEntity.ok("Alimento eliminado con éxito de la dieta.");
+        } catch (IllegalArgumentException e) {
+            logger.warn("Datos no válidos al eliminar alimento de la dieta: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error inesperado al eliminar alimento de la dieta: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al eliminar alimento.");
+        }
+    }
+
+    /**
+     * Obtener alimentos de una dieta en un día específico.
+     */
+    @GetMapping("/{dietId}/{dayWeek}")
+    public ResponseEntity<?> getFoodsByDayOfTheWeek(@PathVariable Long dietId,
+                                                    @PathVariable String dayWeek) {
+        logger.info("Buscando alimentos en la dieta {} para el día {}", dietId, dayWeek);
+        try {
+            DayOfTheWeek dayOfTheWeek = DayOfTheWeek.fromString(dayWeek);
+            List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayOfTheWeek);
+
+            if (foods.isEmpty()) {
+                logger.warn("No hay alimentos registrados en la dieta {} para el día {}", dietId, dayWeek);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron alimentos para ese día en la dieta.");
+            }
+            return ResponseEntity.ok(foods);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Día de la semana inválido: {}", dayWeek);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Día de la semana no válido: " + dayWeek);
+        } catch (Exception e) {
+            logger.error("Error inesperado al obtener alimentos para el día {}: {}", dayWeek, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al obtener alimentos.");
+        }
     }
 }

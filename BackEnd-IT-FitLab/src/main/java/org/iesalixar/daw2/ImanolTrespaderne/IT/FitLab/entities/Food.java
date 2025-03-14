@@ -14,8 +14,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "diets")
-@EqualsAndHashCode(exclude = "diets")
+
 public class Food {
 
     @Id
@@ -40,6 +39,4 @@ public class Food {
     @Column(name = "fats", precision = 5, scale = 2)
     private BigDecimal fats;
 
-    @ManyToMany(mappedBy = "foods", fetch = FetchType.LAZY)
-    private Set<Diet> diets;
 }

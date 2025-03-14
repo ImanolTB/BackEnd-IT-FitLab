@@ -42,6 +42,15 @@ public class DietService {
         return dietMapper.toDTO(dietRepository.save(diet));
     }
 
+    public DietDTO updateDiet(Long id,DietDTO dto){
+        Diet diet=dietRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
+        diet.setDescription(dto.getDescription());
+        diet.setName(dto.getName());
+        diet.setDurationWeeks(dto.getDurationWeeks());
+        return dietMapper.toDTO(dietRepository.save(diet));
+    }
+
     public void deleteDiet(Long id) {
         dietRepository.deleteById(id);
     }

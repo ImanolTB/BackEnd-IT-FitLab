@@ -7,11 +7,9 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.MealType;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 
 @Entity
 @Table(name = "diet_food")
-@IdClass(DietFoodPK.class) // 📌 Definimos la clave primaria compuesta sin `@Embeddable`
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,26 +17,26 @@ import java.time.DayOfWeek;
 @EqualsAndHashCode
 public class DietFood {
 
-    @Id
+    @EmbeddedId
+    private DietFoodPK id;
+
     @ManyToOne
+    @MapsId("dietId")
     @JoinColumn(name = "diet_id", nullable = false)
     private Diet diet;
 
-    @Id
     @ManyToOne
+    @MapsId("foodId")
     @JoinColumn(name = "food_id", nullable = false)
     private Food food;
 
-    @Id
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private DayOfTheWeek dayWeek;
-
-    @Id
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
-    private MealType mealType;
-
     @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal quantity;
+    private BigDecimal quantity ;
+
+    public DietFood(Diet diet, Food food, DayOfTheWeek dayWeek, MealType mealType, BigDecimal quantity) {
+        this.id = new DietFoodPK(diet.getId(), food.getId(), dayWeek, mealType);
+        this.diet = diet;
+        this.food = food;
+        this.quantity = quantity;
+    }
 }

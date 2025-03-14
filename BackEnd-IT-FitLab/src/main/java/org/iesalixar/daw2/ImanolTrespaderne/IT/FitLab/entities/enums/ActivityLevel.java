@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ActivityLevel {
     SEDENTARIO, LIGERO, MODERADO, ACTIVO, MUY_ACTIVO;
 
-    // 🔹 Convierte cualquier string (mayúsculas o minúsculas) en el enum correcto
+    // Convierte cualquier string (mayúsculas o minúsculas) en el enum correcto
     @JsonCreator
     public static ActivityLevel fromString(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -22,7 +22,7 @@ public enum ActivityLevel {
         throw new IllegalArgumentException("Nivel de actividad no válido: " + value);
     }
 
-    // 🔹 Devuelve siempre el nombre en mayúsculas cuando se serializa en JSON
+    // Devuelve siempre el nombre en mayúsculas cuando se serializa en JSON
     @JsonValue
     public String toJson() {
         return name().toUpperCase();

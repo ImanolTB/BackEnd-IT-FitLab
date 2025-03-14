@@ -3,6 +3,7 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietFoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.DietFood;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.DietFoodPK;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Food;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.MealType;
@@ -23,25 +24,27 @@ public class DietFoodMapper {
         DietFoodDTO dto = new DietFoodDTO();
         dto.setDietId(dietFood.getDiet().getId());
         dto.setFoodId(dietFood.getFood().getId());
-        dto.setDayWeek(dietFood.getDayWeek().name());
-        dto.setMealType(dietFood.getMealType().name());
+
         dto.setQuantity(dietFood.getQuantity());
         return dto;
     }
 
-    public DietFood toEntity(DietFoodDTO dto) {
 
+    /**
+     * Convierte un `DietFoodDTO` a una entidad `DietFood`
+     */
+    public DietFood toEntity(DietFoodDTO dto) {
         Diet diet = dietRepository.findById(dto.getDietId())
-                .orElseThrow(() -> new RuntimeException("Dieta no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Error: Dieta no encontrada con ID " + dto.getDietId()));
 
         Food food = foodRepository.findById(dto.getFoodId())
-                .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
-
+                .orElseThrow(() -> new RuntimeException("Error: Alimento no encontrado con ID " + dto.getFoodId()));
+        DietFoodPK dietFoodPK= new DietFoodPK(diet.getId(), food.getId(), dto.getDayWeek(), dto.getMealType());
         DietFood dietFood = new DietFood();
-        dietFood.setDiet(diet);
+        dietFood.setId(dietFoodPK);
         dietFood.setFood(food);
-        dietFood.setDayWeek(DayOfTheWeek.valueOf(dto.getDayWeek().toUpperCase()));
-        dietFood.setMealType(MealType.valueOf(dto.getMealType().toUpperCase()));
+        dietFood.setDiet(diet);
+
         dietFood.setQuantity(dto.getQuantity());
 
         return dietFood;
