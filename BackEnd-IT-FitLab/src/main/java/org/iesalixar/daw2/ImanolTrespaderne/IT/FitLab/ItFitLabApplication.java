@@ -1,4 +1,4 @@
-package orrg.iesalixar.daw2.ImanolTrespaderne.IT.FitLab;
+package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
