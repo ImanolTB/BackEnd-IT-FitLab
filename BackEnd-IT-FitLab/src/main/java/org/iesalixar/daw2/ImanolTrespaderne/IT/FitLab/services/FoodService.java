@@ -1,13 +1,9 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.config.SecurityConfig;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.FoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Food;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.FoodMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.FoodRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +11,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class FoodService {
-    private static final Logger logger = LoggerFactory.getLogger(FoodService.class);
 
-    @Autowired
-    private  FoodRepository foodRepository;
-    @Autowired
-    private  FoodMapper foodMapper;
+    private final FoodRepository foodRepository;
+    private final FoodMapper foodMapper;
+
+    public FoodService(FoodRepository foodRepository, FoodMapper foodMapper) {
+        this.foodRepository = foodRepository;
+        this.foodMapper = foodMapper;
+    }
 
     public List<FoodDTO> getAllFoods() {
         return foodRepository.findAll().stream()
@@ -31,7 +29,7 @@ public class FoodService {
     public FoodDTO getFoodById(Long id) {
         return foodRepository.findById(id)
                 .map(foodMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Food not found"));
+                .orElseThrow(() -> new RuntimeException("Comida no encontrada"));
     }
 
     public FoodDTO createFood(FoodDTO dto) {
@@ -39,7 +37,23 @@ public class FoodService {
         return foodMapper.toDTO(foodRepository.save(food));
     }
 
+    public FoodDTO updateFood(Long id, FoodDTO dto) {
+        Food food = foodRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Comida no encontrada"));
+
+        food.setName(dto.getName());
+        food.setCalories(dto.getCalories());
+        food.setProteins(dto.getProteins());
+        food.setCarbohydrates(dto.getCarbohydrates());
+        food.setFats(dto.getFats());
+
+        return foodMapper.toDTO(foodRepository.save(food));
+    }
+
     public void deleteFood(Long id) {
+        if (!foodRepository.existsById(id)) {
+            throw new IllegalArgumentException("Comida no encontrada");
+        }
         foodRepository.deleteById(id);
     }
 }

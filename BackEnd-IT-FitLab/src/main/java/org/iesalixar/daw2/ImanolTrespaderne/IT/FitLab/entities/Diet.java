@@ -13,8 +13,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "foods")
-@EqualsAndHashCode(exclude = "foods")
 public class Diet {
 
     @Id
@@ -39,11 +37,5 @@ public class Diet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "diet_food",
-            joinColumns = @JoinColumn(name = "diet_id"),
-            inverseJoinColumns = @JoinColumn(name = "food_id")
-    )
-    private Set<Food> foods;
+   ;
 }
