@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS workouts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   description VARCHAR(100),
+  session_Number INTEGER,
   training_program_id INT NOT NULL,
     FOREIGN KEY (training_program_id) REFERENCES training_programmes(id)
     ON DELETE CASCADE ON UPDATE CASCADE
