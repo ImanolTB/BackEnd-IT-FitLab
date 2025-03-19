@@ -12,19 +12,22 @@ public class TrainingProgrammeMapper {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserMapper userMapper;
+
 
     public TrainingProgrammeDTO toDTO(TrainingProgramme programme) {
         TrainingProgrammeDTO dto = new TrainingProgrammeDTO();
         dto.setId(programme.getId());
         dto.setName(programme.getName());
         dto.setDurationWeeks(programme.getDurationWeeks());
-        dto.setUserId(programme.getUser().getId());
+        dto.setUser(userMapper.toDTO(programme.getUser()));
         return dto;
     }
 
     public TrainingProgramme toEntity(TrainingProgrammeDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID " + dto.getUserId()));
+        User user = userRepository.findById(dto.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID " + dto.getUser().getId()));
 
         TrainingProgramme programme = new TrainingProgramme();
         programme.setId(dto.getId());

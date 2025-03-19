@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dietfood")
+@RequestMapping("/api/v1/dietfood")
 public class DietFoodController {
 
     private static final Logger logger = LoggerFactory.getLogger(DietFoodController.class);

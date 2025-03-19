@@ -1,6 +1,5 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.config.SecurityConfig;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.DietMapper;
@@ -22,8 +21,8 @@ public class DietService {
     private  DietRepository dietRepository;
     @Autowired
     private  DietMapper dietMapper;
-
-
+    @Autowired
+    private CustomUserDetailService userDetailService;
 
     public List<DietDTO> getAllDiets() {
         return dietRepository.findAll().stream()
@@ -36,7 +35,12 @@ public class DietService {
                 .map(dietMapper::toDTO)
                 .orElseThrow(() -> new RuntimeException("Diet not found"));
     }
-
+    public List<DietDTO> obtenerDietasPorUsuario(String username) {
+        return dietRepository.findByUserUsername(username)
+                .stream()
+                .map(dietMapper::toDTO)
+                .collect(Collectors.toList());
+    }
     public DietDTO createDiet(DietDTO dto) {
         Diet diet = dietMapper.toEntity(dto);
         return dietMapper.toDTO(dietRepository.save(diet));
