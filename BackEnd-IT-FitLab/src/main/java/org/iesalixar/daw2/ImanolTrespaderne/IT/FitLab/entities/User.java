@@ -10,11 +10,11 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.ActivityLev
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.Gender;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "roles")
@@ -71,4 +71,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_level", nullable = false)
     private ActivityLevel activityLevel;
+
+    // Campo que indica si el usuario está habilitado.
+    @NotNull(message = "Debes porporcionar el estado del usuario")
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 }

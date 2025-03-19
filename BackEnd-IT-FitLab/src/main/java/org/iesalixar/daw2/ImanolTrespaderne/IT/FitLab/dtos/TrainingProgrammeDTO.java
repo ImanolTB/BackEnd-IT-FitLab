@@ -9,5 +9,5 @@ public class TrainingProgrammeDTO {
     private Long id;
     private String name;
     private Integer durationWeeks;
-    private Long userId;
+    private UserDTO user;
 }
