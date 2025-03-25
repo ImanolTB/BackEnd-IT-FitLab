@@ -84,6 +84,9 @@ public class TrainingProgrammeService {
         }
         try {
             TrainingProgramme programme = programmeMapper.toEntity(dto);
+            if (dto.getIsGeneric() == null) {
+                dto.setIsGeneric(false);
+            }
             programme = programmeRepository.save(programme);
             logger.info("Programa de entrenamiento creado con éxito: {}", programme.getId());
             return programmeMapper.toDTO(programme);
@@ -105,6 +108,12 @@ public class TrainingProgrammeService {
         try {
             programme.setName(dto.getName());
             programme.setDurationWeeks(dto.getDurationWeeks());
+            programme.setIsGeneric(dto.getIsGeneric());
+            if (programme.getIsGeneric() == null) {
+                programme.setIsGeneric(false);
+            }
+            programme.setTrainingLevel(dto.getTrainingLevel());
+
 
             programme = programmeRepository.save(programme);
             logger.info("Programa de entrenamiento actualizado con éxito: {}", id);
@@ -129,5 +138,22 @@ public class TrainingProgrammeService {
             logger.error("Error al eliminar programa de entrenamiento con ID {}: {}", id, e.getMessage());
             throw new RuntimeException("Error interno al eliminar programa de entrenamiento.");
         }
+    }
+
+    public void validateOwnership(Long programmeId, String username) {
+        if (isAdmin(username)) return;
+
+        TrainingProgramme programme = programmeRepository.findById(programmeId)
+                .orElseThrow(() -> new IllegalArgumentException("Programa de entrenamiento no encontrado"));
+
+        if (!programme.getUser().getUsername().equals(username)) {
+            throw new SecurityException("No tienes permiso para modificar este programa de entrenamiento.");
+        }
+    }
+    public boolean isAdmin(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("ROLE_ADMIN")))
+                .orElse(false);
     }
 }

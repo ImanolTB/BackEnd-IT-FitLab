@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.TrainingLevel;
 
 @Entity
 @Table(name = "training_programmes")
@@ -26,6 +27,15 @@ public class TrainingProgramme {
     @NotNull(message = "La duración del programa de entrenamiento es obligatoria.")
     @Column(name = "duration_weeks", nullable = false)
     private Integer durationWeeks;
+
+
+    @Column(name = "is_generic")
+    private Boolean isGeneric;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "training_level")
+    private TrainingLevel trainingLevel;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

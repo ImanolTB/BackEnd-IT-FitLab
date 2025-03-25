@@ -88,20 +88,12 @@ public class TrainingProgrammeController {
         logger.info("Solicitud GET: Obtener programa de entrenamiento con ID {}", id);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-
-            // Obtener el programa de entrenamiento
+            programmeService.validateOwnership(id, username);
             TrainingProgrammeDTO program = programmeService.getTrainingProgrammeById(id);
             if (program == null) {
                 logger.warn("No se encontró el programa de entrenamiento con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el programa de entrenamiento con ID: " + id);
             }
-
-            // Verificar si el usuario autenticado es el propietario del programa de entrenamiento
-            if (!program.getUser().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para acceder al programa de entrenamiento con ID: {}", id);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para acceder a este programa de entrenamiento.");
-            }
-
             logger.info("Programa de entrenamiento con ID {} encontrado: {}", id, program);
             return ResponseEntity.ok(program);
 
@@ -140,6 +132,9 @@ public class TrainingProgrammeController {
         try {
             String username = jwtUtil.getAuthenticatedUsername();
 
+            // Validamos propiedad del programa
+            programmeService.validateOwnership(id, username);
+
             // Obtener el programa de entrenamiento
             Optional<TrainingProgrammeDTO> existingProgramme = Optional.ofNullable(programmeService.getTrainingProgrammeById(id));
             if (existingProgramme.isEmpty()) {
@@ -176,6 +171,7 @@ public class TrainingProgrammeController {
         logger.info("Solicitud DELETE: Eliminar programa de entrenamiento con ID {}", id);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
+            programmeService.validateOwnership(id, username);
 
             // Obtener el programa de entrenamiento
             Optional<TrainingProgrammeDTO> existingProgramme = Optional.ofNullable(programmeService.getTrainingProgrammeById(id));
@@ -183,13 +179,6 @@ public class TrainingProgrammeController {
                 logger.warn("No se encontró el programa de entrenamiento con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el programa de entrenamiento con ID: " + id);
             }
-
-            // Validar que el usuario autenticado es el propietario del programa
-            if (!existingProgramme.get().getUser().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para eliminar el programa con ID {}", id);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para eliminar este programa de entrenamiento.");
-            }
-
             // Eliminar el programa
             programmeService.deleteTrainingProgramme(id);
             logger.info("Programa de entrenamiento con ID {} eliminado exitosamente", id);
@@ -198,6 +187,8 @@ public class TrainingProgrammeController {
         } catch (IllegalArgumentException e) {
             logger.warn("Intento de eliminar programa inexistente: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error inesperado en DELETE: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al eliminar programa de entrenamiento.");
