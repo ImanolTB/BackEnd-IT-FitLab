@@ -36,34 +36,26 @@ public class UserService {
     public UserDTO getUserById(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Ussuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 
     public UserDTO createUser(UserDTO dto) {
         User user = userMapper.toEntity(dto);
-        //Encripar aqui la contraseña
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
-        // Buscar el rol "USER" y asignarlo a la persona
-        Role roles = roleRepository.findByName("ROLE_USER")
+        Role role = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("El rol USER no fue encontrado"));
-
-        // Asignar el rol al usuario
-        user.setRoles(Collections.singleton(roles));
+        user.setRoles(Collections.singleton(role));
         return userMapper.toDTO(userRepository.save(user));
     }
 
     public UserDTO createAdmin(UserDTO dto) {
         User user = userMapper.toEntity(dto);
-        //Encripar aqui la contraseña
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
-        // Buscar el rol "USER" y asignarlo a la persona
-        Role roles = roleRepository.findByName("ROLE_ADMIN")
+        Role role = roleRepository.findByName("ROLE_ADMIN")
                 .orElseThrow(() -> new RuntimeException("El rol ADMIN no fue encontrado"));
-
-        // Asignar el rol al usuario
-        user.setRoles(Collections.singleton(roles));
+        user.setRoles(Collections.singleton(role));
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -77,14 +69,47 @@ public class UserService {
         user.setWeight(dto.getWeight());
         user.setGender(dto.getGender());
         user.setActivityLevel(dto.getActivityLevel());
-
         return userMapper.toDTO(userRepository.save(user));
     }
 
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("Persona no encontrada");
+            throw new IllegalArgumentException("Usuario no encontrado");
         }
         userRepository.deleteById(id);
+    }
+
+    public void deactivateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
+
+    public void reactivateUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
+        if (user.isEnabled()) {
+            throw new IllegalArgumentException("La cuenta ya está activa.");
+        }
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    public void validateUserOwnership(Long userId, String username) {
+        if (isAdmin(username)) return;
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        if (!user.getUsername().equals(username) && !isAdmin(username)) {
+            throw new SecurityException("No tienes permiso para realizar esta acción.");
+        }
+    }
+
+    public boolean isAdmin(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("ROLE_ADMIN")))
+                .orElse(false);
     }
 }
