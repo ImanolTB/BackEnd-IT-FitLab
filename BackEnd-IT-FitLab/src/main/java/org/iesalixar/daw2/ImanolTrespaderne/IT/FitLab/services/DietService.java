@@ -1,10 +1,10 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.config.SecurityConfig;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.DietMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.DietRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,39 +19,87 @@ public class DietService {
 
 
     @Autowired
-    private  DietRepository dietRepository;
+    private DietRepository dietRepository;
+
     @Autowired
-    private  DietMapper dietMapper;
+    private UserRepository userRepository;
 
+    @Autowired
+    private DietMapper dietMapper;
+    @Autowired
+    private CustomUserDetailService userDetailService;
 
-
-    public List<DietDTO> getAllDiets() {
-        return dietRepository.findAll().stream()
-                .map(dietMapper::toDTO)
-                .collect(Collectors.toList());
+    public List <DietDTO> getAllDiets() {
+        try {
+            return dietRepository.findAll().stream()
+                    .map(dietMapper::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener las dietas.");
+        }
     }
 
     public DietDTO getDietById(Long id) {
         return dietRepository.findById(id)
                 .map(dietMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Diet not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
+    }
+
+    public List<DietDTO> obtenerDietasPorUsuario(String username) {
+        try {
+            return dietRepository.findByUserUsername(username)
+                    .stream()
+                    .map(dietMapper::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener las dietas del usuario.");
+        }
     }
 
     public DietDTO createDiet(DietDTO dto) {
-        Diet diet = dietMapper.toEntity(dto);
-        return dietMapper.toDTO(dietRepository.save(diet));
+        try {
+            Diet diet = dietMapper.toEntity(dto);
+            return dietMapper.toDTO(dietRepository.save(diet));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al crear la dieta.");
+        }
     }
 
-    public DietDTO updateDiet(Long id,DietDTO dto){
-        Diet diet=dietRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
-        diet.setDescription(dto.getDescription());
-        diet.setName(dto.getName());
-        diet.setDurationWeeks(dto.getDurationWeeks());
-        return dietMapper.toDTO(dietRepository.save(diet));
+    public DietDTO updateDiet(Long id, DietDTO dto) {
+        try {
+            Diet diet = dietRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
+            diet.setDescription(dto.getDescription());
+            diet.setName(dto.getName());
+            diet.setDurationWeeks(dto.getDurationWeeks());
+            return dietMapper.toDTO(dietRepository.save(diet));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar la dieta.");
+        }
     }
 
     public void deleteDiet(Long id) {
-        dietRepository.deleteById(id);
+        try {
+            dietRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la dieta.");
+        }
+    }
+
+    public void validateOwnership(Long dietId, String username) {
+        if (isAdmin(username)) return;
+        Diet diet = dietRepository.findById(dietId)
+                .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
+
+        if (!diet.getUser().getUsername().equals(username) && !isAdmin(username)) {
+            throw new SecurityException("No tienes permiso para modificar esta dieta.");
+        }
+    }
+
+    public boolean isAdmin(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("ROLE_ADMIN")))
+                .orElse(false);
     }
 }

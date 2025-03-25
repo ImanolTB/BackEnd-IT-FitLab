@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/workoutexercises")
+@RequestMapping("/api/v1/workoutexercises")
 public class WorkoutExerciseController {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkoutExerciseController.class);

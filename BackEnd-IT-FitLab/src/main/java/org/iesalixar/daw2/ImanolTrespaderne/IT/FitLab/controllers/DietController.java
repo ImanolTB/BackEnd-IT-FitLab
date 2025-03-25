@@ -2,8 +2,14 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.FoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Food;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.DietService;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.FoodService;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +21,17 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/diets")
+@RequestMapping("/api/v1/diets")
 public class DietController {
     private static final Logger logger = LoggerFactory.getLogger(DietController.class);
 
     @Autowired
     private DietService dietService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-
+    @Autowired
+    private FoodService foodService;
 
     /**
      * Obtener todas las dietas.
@@ -33,10 +42,8 @@ public class DietController {
         try {
             List<DietDTO> diets = dietService.getAllDiets();
             if (diets.isEmpty()) {
-                logger.warn("No hay dietas registradas.");
                 return ResponseEntity.noContent().build();
             }
-            logger.info("Se han encontrado {} dietas.", diets.size());
             return ResponseEntity.ok(diets);
         } catch (Exception e) {
             logger.error("Error al listar las dietas: {}", e.getMessage());
@@ -44,76 +51,90 @@ public class DietController {
         }
     }
 
-    /**
-     * Obtener una dieta por ID.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getDietById(@PathVariable Long id) {
-        logger.info("Buscando usuario con ID: {}", id);
+        logger.info("Buscando dieta con ID: {}", id);
         try {
-            Optional<DietDTO> diet = Optional.ofNullable(dietService.getDietById(id));
-            if (diet.isPresent()) {
-                logger.info("Dieta con ID {} encontrado: {}", id, diet.get());
-                return ResponseEntity.ok(diet.get());
-            } else {
-                logger.warn("No se encontró la dieta con ID: {}", id);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la dieta con ID: " + id);
-            }
+            String username = jwtUtil.getAuthenticatedUsername();
+            dietService.validateOwnership(id, username);
+            return ResponseEntity.ok(dietService.getDietById(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error al buscar la dieta con ID {}: {}", id, e.getMessage());
+            logger.error("Error interno al obtener la dieta: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
 
-    /**
-     * Crear una nueva dieta.
-     */
+    @GetMapping("/{id}/day/{dayOfWeek}")
+    public ResponseEntity<?> getFoodsByDietAndDay(@PathVariable Long id, @PathVariable String dayOfWeek) {
+        logger.info("Obteniendo alimentos de la dieta {} para el día {}", id, dayOfWeek);
+        try {
+            String username = jwtUtil.getAuthenticatedUsername();
+            dietService.validateOwnership(id, username);
+
+            DayOfTheWeek dayEnum;
+            try {
+                dayEnum = DayOfTheWeek.valueOf(dayOfWeek.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Día inválido: " + dayOfWeek);
+            }
+
+            List<FoodDTO> foods = foodService.getFoodsByDay(id, dayEnum);
+            return foods.isEmpty()
+                    ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron alimentos para el día " + dayOfWeek)
+                    : ResponseEntity.ok(foods);
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error al obtener alimentos: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno.");
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createDiet(@Valid @RequestBody DietDTO dto) {
-        logger.info("Intentando registrar una nueva dieta con nombre: {}", dto.getName());
         try {
-            DietDTO createdDiet = dietService.createDiet(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdDiet);
+            return ResponseEntity.status(HttpStatus.CREATED).body(dietService.createDiet(dto));
         } catch (IllegalArgumentException e) {
-            logger.warn("Error en los datos proporcionados de la dieta: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error al crear la dieta: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear al crear la dieta.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear la dieta.");
         }
     }
 
-    /**
-     * Actualizar una dieta existente.
-     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateDiet(@PathVariable Long id, @Valid @RequestBody DietDTO dto) {
-        logger.info("Intentando actualizar la dieta con ID {}", id);
         try {
-            DietDTO updatedDiet = dietService.updateDiet(id, dto);
-            return ResponseEntity.ok(updatedDiet);
+            String username = jwtUtil.getAuthenticatedUsername();
+            dietService.validateOwnership(id, username);
+            return ResponseEntity.ok(dietService.updateDiet(id, dto));
         } catch (IllegalArgumentException e) {
-            logger.warn("Error en los datos proporcionados de la dieta: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error al actualizar la dieta: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la dieta.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al actualizar la dieta.");
         }
     }
 
-    /**
-     * Eliminar dieta por ID.
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        logger.info("Intentando eliminar la dieta con ID {}", id);
+    public ResponseEntity<?> deleteDiet(@PathVariable Long id) {
         try {
+            String username = jwtUtil.getAuthenticatedUsername();
+            dietService.validateOwnership(id, username);
             dietService.deleteDiet(id);
-
-            return ResponseEntity.ok("Usuario con id: "+id+" eliminado con éxito.");
+            return ResponseEntity.ok("Dieta con ID " + id + " eliminada con éxito.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error al eliminar el usuario con ID {}: {}", id, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar el usuario.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al eliminar la dieta.");
         }
     }
+
 }

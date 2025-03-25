@@ -6,9 +6,11 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingProgrammeMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.TrainingProgrammeRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,15 +73,20 @@ public class TrainingProgrammeService {
         }
     }
 
+
+
     @Transactional
     public TrainingProgrammeDTO createTrainingProgramme(TrainingProgrammeDTO dto) {
         logger.info("Creando nuevo programa de entrenamiento: {}", dto.getName());
-        if (dto.getUserId() == null || !userRepository.existsById(dto.getUserId())) {
-            logger.warn("Intento de creación con usuario inválido: {}", dto.getUserId());
+        if (dto.getUser().getId() == null || !userRepository.existsById(dto.getUser().getId())) {
+            logger.warn("Intento de creación con usuario inválido: {}", dto.getUser().getId());
             throw new IllegalArgumentException("Usuario no encontrado para asociar al programa.");
         }
         try {
             TrainingProgramme programme = programmeMapper.toEntity(dto);
+            if (dto.getIsGeneric() == null) {
+                dto.setIsGeneric(false);
+            }
             programme = programmeRepository.save(programme);
             logger.info("Programa de entrenamiento creado con éxito: {}", programme.getId());
             return programmeMapper.toDTO(programme);
@@ -101,6 +108,12 @@ public class TrainingProgrammeService {
         try {
             programme.setName(dto.getName());
             programme.setDurationWeeks(dto.getDurationWeeks());
+            programme.setIsGeneric(dto.getIsGeneric());
+            if (programme.getIsGeneric() == null) {
+                programme.setIsGeneric(false);
+            }
+            programme.setTrainingLevel(dto.getTrainingLevel());
+
 
             programme = programmeRepository.save(programme);
             logger.info("Programa de entrenamiento actualizado con éxito: {}", id);
@@ -125,5 +138,22 @@ public class TrainingProgrammeService {
             logger.error("Error al eliminar programa de entrenamiento con ID {}: {}", id, e.getMessage());
             throw new RuntimeException("Error interno al eliminar programa de entrenamiento.");
         }
+    }
+
+    public void validateOwnership(Long programmeId, String username) {
+        if (isAdmin(username)) return;
+
+        TrainingProgramme programme = programmeRepository.findById(programmeId)
+                .orElseThrow(() -> new IllegalArgumentException("Programa de entrenamiento no encontrado"));
+
+        if (!programme.getUser().getUsername().equals(username)) {
+            throw new SecurityException("No tienes permiso para modificar este programa de entrenamiento.");
+        }
+    }
+    public boolean isAdmin(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("ROLE_ADMIN")))
+                .orElse(false);
     }
 }

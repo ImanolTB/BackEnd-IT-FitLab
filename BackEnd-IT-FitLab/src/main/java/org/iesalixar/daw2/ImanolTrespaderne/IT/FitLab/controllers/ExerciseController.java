@@ -8,12 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/exercises")
+@RequestMapping("/api/v1/exercises")
 public class ExerciseController {
 
     private static final Logger logger = LoggerFactory.getLogger(ExerciseController.class);
@@ -40,7 +41,7 @@ public class ExerciseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al obtener el ejercicio.");
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createExercise(@Valid @RequestBody ExerciseDTO dto) {
         logger.info("Recibiendo solicitud para crear un nuevo ejercicio.");
@@ -54,7 +55,7 @@ public class ExerciseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al crear ejercicio.");
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExercise(@PathVariable Long id, @Valid @RequestBody ExerciseDTO dto) {
         logger.info("Recibiendo solicitud para actualizar ejercicio con ID: {}", id);
@@ -68,7 +69,7 @@ public class ExerciseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al actualizar ejercicio.");
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExercise(@PathVariable Long id) {
         logger.info("Recibiendo solicitud para eliminar ejercicio con ID: {}", id);

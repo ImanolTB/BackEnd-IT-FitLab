@@ -1,7 +1,9 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import lombok.Data;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.FoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Food;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.FoodMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.FoodRepository;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,13 @@ public class FoodService {
                 .map(foodMapper::toDTO)
                 .orElseThrow(() -> new RuntimeException("Comida no encontrada"));
     }
+    public List<FoodDTO> getFoodsByDay(Long dietId, DayOfTheWeek dayOfWeek) {
+        List<Food> foods = foodRepository.findFoodsByDietAndDay(dietId, dayOfWeek);
 
+        return foods.stream()
+                .map(foodMapper::toDTO) // Convertimos Food a FoodDTO
+                .collect(Collectors.toList());
+    }
     public FoodDTO createFood(FoodDTO dto) {
         Food food = foodMapper.toEntity(dto);
         return foodMapper.toDTO(foodRepository.save(food));
