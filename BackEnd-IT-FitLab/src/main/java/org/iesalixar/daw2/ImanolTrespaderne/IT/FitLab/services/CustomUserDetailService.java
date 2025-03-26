@@ -5,6 +5,7 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.User;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Role;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
