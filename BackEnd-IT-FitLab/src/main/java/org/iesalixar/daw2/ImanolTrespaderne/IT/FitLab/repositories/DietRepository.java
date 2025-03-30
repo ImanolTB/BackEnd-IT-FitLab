@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DietRepository extends JpaRepository<Diet, Long> {
     List<Diet> findByUserUsername(String username);
+
 }

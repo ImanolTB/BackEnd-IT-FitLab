@@ -68,6 +68,7 @@ public class JwtUtil {
     public boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }
+
     public String getAuthenticatedUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {

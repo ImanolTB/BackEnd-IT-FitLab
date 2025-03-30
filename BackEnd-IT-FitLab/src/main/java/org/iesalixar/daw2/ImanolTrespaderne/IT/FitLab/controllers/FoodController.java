@@ -46,7 +46,7 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el alimento con ID " + id);
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createFood(@RequestBody FoodDTO dto) {
         try {
@@ -56,7 +56,7 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el alimento.");
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateFood(@PathVariable Long id, @RequestBody FoodDTO dto) {
         try {
@@ -72,7 +72,7 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el alimento.");
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteFood(@PathVariable Long id) {
         try {
