@@ -63,11 +63,11 @@ public class DietFoodController {
      */
     @GetMapping("/{dietId}/{dayWeek}")
     public ResponseEntity<?> getFoodsByDayOfTheWeek(@PathVariable Long dietId,
-                                                    @PathVariable String dayWeek) {
+                                                    @PathVariable DayOfTheWeek dayWeek) {
         logger.info("Buscando alimentos en la dieta {} para el día {}", dietId, dayWeek);
         try {
-            DayOfTheWeek dayOfTheWeek = DayOfTheWeek.fromString(dayWeek);
-            List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayOfTheWeek);
+
+            List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayWeek);
 
             if (foods.isEmpty()) {
                 logger.warn("No hay alimentos registrados en la dieta {} para el día {}", dietId, dayWeek);

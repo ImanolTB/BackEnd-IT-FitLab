@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class DietController {
     /**
      * Obtener todas las dietas.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<DietDTO>> getAllDiets() {
         logger.info("Solicitando la lista de todas las dietas...");
@@ -67,6 +69,33 @@ public class DietController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getDietByUsername() {
+        try {
+            String username = jwtUtil.getAuthenticatedUsername();
+            List<DietDTO> diets = dietService.getDietByUsername(username);
+
+            if (diets.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encontraron dietas para el usuario.");
+            }
+
+            return ResponseEntity.ok(diets);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: " + e.getMessage());
+
+        } catch (Exception e) {
+            logger.error("Error al obtener dietas por username: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor.");
+        }
+    }
+
 
     @GetMapping("/{id}/day/{dayOfWeek}")
     public ResponseEntity<?> getFoodsByDietAndDay(@PathVariable Long id, @PathVariable String dayOfWeek) {

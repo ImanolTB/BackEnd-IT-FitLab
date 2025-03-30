@@ -45,8 +45,13 @@ public class DietService {
                 .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
     }
 
-    public List<DietDTO> obtenerDietasPorUsuario(String username) {
+    public List<DietDTO> getDietByUsername(String username) {
         try {
+            List<Diet> diets = dietRepository.findByUserUsername(username);
+
+            if (diets.isEmpty()) {
+                throw new IllegalArgumentException("No se encontraron dietas para el usuario: " + username);
+            }
             return dietRepository.findByUserUsername(username)
                     .stream()
                     .map(dietMapper::toDTO)
