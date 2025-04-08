@@ -1,18 +1,20 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.ActivityLevel;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.Gender;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "roles")
@@ -23,39 +25,63 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "{msg.user.username.notEmpty}")
-    @Size(max = 50, message = "{msg.user.username.size}")
+    @NotEmpty(message = "El nombre de usuario no puede estar vacío.")
+    @Size(max = 50, message = "El nombre de usuario no puede superar los 50 caracteres.")
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @NotEmpty(message = "{msg.user.password.notEmpty}")
-    @Size(min = 8, message = "{msg.user.password.size}")
+    @NotEmpty(message = "La contraseña no puede estar vacía.")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.")
     @Column(nullable = false, length = 100)
     private String password;
 
+    @NotEmpty(message = "El correo electrónico no puede estar vacío.")
+    @Email(message = "Debe proporcionar un correo electrónico válido.")
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(length = 100)
+    @NotEmpty(message = "El nombre no puede estar vacío.")
+    @Size(max = 100, message = "El nombre no puede superar los 100 caracteres.")
+    @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(name = "last_name", length = 100)
+    @NotEmpty(message = "El apellido no puede estar vacío.")
+    @Size(max = 100, message = "El apellido no puede superar los 100 caracteres.")
+    @Column(name = "last_name", length = 100, nullable = false)
     private String lastName;
 
-    @Column(name = "age")
+    @NotNull(message = "La edad es obligatoria.")
+    @Column(name = "age", nullable = false)
     private Integer age;
 
-    @Column(name = "height", precision = 5, scale = 2)
+    @NotNull(message = "La altura es obligatoria.")
+    @Column(name = "height", precision = 5, scale = 2, nullable = false)
     private BigDecimal height;
 
-    @Column(name = "weight", precision = 5, scale = 2)
+    @NotNull(message = "El peso es obligatorio.")
+    @Column(name = "weight", precision = 5, scale = 2, nullable = false)
     private BigDecimal weight;
 
+    @NotNull(message = "El género es obligatorio.")
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false, length = 1)
     private Gender gender;
 
+    @NotNull(message = "El nivel de actividad es obligatorio.")
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_level", nullable = false)
     private ActivityLevel activityLevel;
+
+    // Campo que indica si el usuario está habilitado.
+    @NotNull(message = "Debes porporcionar el estado del usuario")
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 }

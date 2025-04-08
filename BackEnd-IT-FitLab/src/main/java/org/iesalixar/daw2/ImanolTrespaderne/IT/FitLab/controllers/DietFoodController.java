@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dietfood")
+@RequestMapping("/api/v1/dietfood")
 public class DietFoodController {
 
     private static final Logger logger = LoggerFactory.getLogger(DietFoodController.class);
@@ -88,11 +88,11 @@ public class DietFoodController {
      */
     @GetMapping("/{dietId}/{dayWeek}")
     public ResponseEntity<?> getFoodsByDayOfTheWeek(@PathVariable Long dietId,
-                                                    @PathVariable String dayWeek) {
+                                                    @PathVariable DayOfTheWeek dayWeek) {
         logger.info("Buscando alimentos en la dieta {} para el día {}", dietId, dayWeek);
         try {
-            DayOfTheWeek dayOfTheWeek = DayOfTheWeek.fromString(dayWeek);
-            List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayOfTheWeek);
+
+            List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayWeek);
 
             if (foods.isEmpty()) {
                 logger.warn("No hay alimentos registrados en la dieta {} para el día {}", dietId, dayWeek);

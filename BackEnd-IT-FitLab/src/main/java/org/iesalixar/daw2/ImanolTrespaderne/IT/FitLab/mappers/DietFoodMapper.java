@@ -24,7 +24,10 @@ public class DietFoodMapper {
         DietFoodDTO dto = new DietFoodDTO();
         dto.setDietId(dietFood.getDiet().getId());
         dto.setFoodId(dietFood.getFood().getId());
+        dto.setFoodName(dietFood.getFood().getName());
 
+        dto.setDayWeek(dietFood.getId().getDayWeek());
+        dto.setMealType(dietFood.getId().getMealType());
         dto.setQuantity(dietFood.getQuantity());
         return dto;
     }
@@ -44,7 +47,6 @@ public class DietFoodMapper {
         dietFood.setId(dietFoodPK);
         dietFood.setFood(food);
         dietFood.setDiet(diet);
-
         dietFood.setQuantity(dto.getQuantity());
 
         return dietFood;

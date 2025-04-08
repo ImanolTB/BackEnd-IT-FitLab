@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class DietFoodDTO {
     private Long dietId;
     private Long foodId;
+    private String foodName;
     private DayOfTheWeek dayWeek;
     private MealType mealType;
     private BigDecimal quantity;

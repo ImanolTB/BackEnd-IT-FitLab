@@ -12,5 +12,5 @@ public class DietDTO {
     private String name;
     private String description;
     private Integer durationWeeks;
-    private Long userId;
+    private UserDTO user;
 }
