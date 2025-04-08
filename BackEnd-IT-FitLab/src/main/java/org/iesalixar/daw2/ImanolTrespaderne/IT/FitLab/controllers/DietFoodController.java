@@ -2,6 +2,7 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietFoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.MealType;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.DietFoodService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,31 @@ public class DietFoodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al añadir alimento.");
         }
     }
+    @PutMapping("/{dietId}/{dayWeek}/{mealType}")
+    public ResponseEntity<?> replaceFoodsForDayAndType(@PathVariable Long dietId,
+                                                       @PathVariable DayOfTheWeek dayWeek,
+                                                       @PathVariable MealType mealType,
+                                                       @RequestBody List<DietFoodDTO> nuevosAlimentos) {
+        logger.info("Reemplazando alimentos en dieta {}, día {} y tipo {}", dietId, dayWeek, mealType);
 
+        if (nuevosAlimentos == null) {
+            return ResponseEntity.badRequest().body("Lista de alimentos no proporcionada.");
+        }
+
+        for (DietFoodDTO dto : nuevosAlimentos) {
+            if (!dto.getDietId().equals(dietId) || dto.getDayWeek() != dayWeek || dto.getMealType() != mealType) {
+                return ResponseEntity.badRequest().body("Todos los alimentos deben coincidir con los parámetros de la URL.");
+            }
+        }
+
+        try {
+            List<DietFoodDTO> actualizados = dietFoodService.replaceFoodsForDayAndType(dietId, dayWeek, mealType, nuevosAlimentos);
+            return ResponseEntity.ok(actualizados);
+        } catch (Exception e) {
+            logger.error("Error al reemplazar alimentos", e); // <-- Aquí va el stacktrace completo
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar alimentos.");
+        }
+    }
     /**
      * Eliminar un alimento de una dieta para un día y tipo de comida específicos.
      */
