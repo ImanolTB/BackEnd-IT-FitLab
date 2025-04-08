@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/diets/**",
                                 "/api/v1/food",
-                                "/api/v1/dietfood",
+                                "/api/v1/dietfood/**",
                                 "/api/v1/trainingprogrammes",
                                 "/api/v1/workouts",
                                 "/api/v1/exercises",
