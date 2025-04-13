@@ -46,10 +46,12 @@ public class SecurityConfig {
                                 "/api/v1/trainingprogrammes",
                                 "/api/v1/workouts",
                                 "/api/v1/exercises",
-                                "/api/v1/workoutexercises," +
+                                "/api/v1/user/username/{username}",
+                                "/api/v1/workoutexercises",
                                         "/api/v1/reviews").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/api/v1/login","/api/v1/user/register","/api/v1/user/reactivate/{email}").permitAll()
+                        .requestMatchers("/api/v1/login","/api/v1/user/register","/api/v1/user/reactivate/{email}",
+                                "/api/v1/user/check-username/{username}","/api/v1/user/check-email/{email}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

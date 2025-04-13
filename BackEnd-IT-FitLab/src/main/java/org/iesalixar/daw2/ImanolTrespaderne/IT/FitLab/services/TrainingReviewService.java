@@ -7,7 +7,7 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingReviewPK;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.User;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingProgrammeMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingReviewMapper;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.UserMapper;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.CreateUserMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.TrainingProgrammeRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.TrainingReviewRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class TrainingReviewService {
 
     @Autowired
-    private UserMapper userMapper;
+    private CreateUserMapper userMapper;
 
     @Autowired
     private TrainingProgrammeMapper trainingProgrammeMapper;

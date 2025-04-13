@@ -1,6 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import jakarta.validation.Valid;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.UserService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -30,10 +32,10 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<CreateUserDTO>> getAllUsers() {
         logger.info("Solicitando la lista de todos los usuarios...");
         try {
-            List<UserDTO> users = userService.getAllUsers();
+            List<CreateUserDTO> users = userService.getAllUsers();
             if (users.isEmpty()) {
                 logger.warn("No hay usuarios registrados.");
                 return ResponseEntity.noContent().build();
@@ -55,7 +57,7 @@ public class UserController {
         try {
             String username = jwtUtil.getAuthenticatedUsername();
 
-            Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(id));
+            Optional<CreateUserDTO> user = Optional.ofNullable(userService.getUserById(id));
             if (user.isEmpty()) {
                 logger.warn("No se encontró el usuario con ID: {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario con ID: " + id);
@@ -81,10 +83,10 @@ public class UserController {
      * Crear un nuevo usuario.
      */
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO dto) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserDTO dto) {
         logger.info("Intentando registrar un nuevo usuario con username: {}", dto.getUsername());
         try {
-            UserDTO createdUser = userService.createUser(dto);
+            CreateUserDTO createdUser = userService.createUser(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado exitosamente");
         } catch (IllegalArgumentException e) {
             logger.warn("Error en los datos del usuario: {}", e.getMessage());
@@ -99,10 +101,10 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/register")
-    public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserDTO dto) {
+    public ResponseEntity<?> registerAdmin(@Valid @RequestBody CreateUserDTO dto) {
         logger.info("Intentando registrar un nuevo usuario con username: {}", dto.getUsername());
         try {
-            UserDTO createdUser = userService.createAdmin(dto);
+            CreateUserDTO createdUser = userService.createAdmin(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body("Administrador registrado exitosamente");
         } catch (IllegalArgumentException e) {
             logger.warn("Error en los datos del usuario: {}", e.getMessage());
@@ -112,17 +114,68 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el usuario.");
         }
     }
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        try {
+            UserDTO userDTO = userService.getUserByUsername(username);
+            return ResponseEntity.ok(userDTO);
+        } catch (NoSuchElementException ex) {
+            return ResponseEntity.status(404).body("Usuario no encontrado: " + username);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Error interno del servidor.");
+        }
+    }
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<?> checkUsernameAvailability(@PathVariable String username) {
+        logger.info("Verificando disponibilidad del username: {}", username);
 
+        try {
+            boolean exists = userService.isUsernameTaken(username);
+
+            logger.info("El username '{}' está {}", username, exists ? "en uso" : "disponible");
+            return ResponseEntity.ok(exists);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Solicitud inválida: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+        } catch (Exception e) {
+            logger.error("Error al verificar username '{}': {}", username, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor al verificar el username.");
+        }
+    }
+
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<?> checkEmailAvailability(@PathVariable String email) {
+        logger.info("Verificando disponibilidad del email: {}", email);
+
+        try {
+            boolean exists = userService.isEmailTaken(email);
+
+            logger.info("El email '{}' está {}", email, exists ? "en uso" : "disponible");
+            return ResponseEntity.ok(exists);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Solicitud inválida: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+        } catch (Exception e) {
+            logger.error("Error al verificar email '{}': {}", email, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor al verificar el email.");
+        }
+    }
     /**
      * Actualizar un usuario existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO dto) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody CreateUserDTO dto) {
         logger.info("Intentando actualizar el usuario con ID {}", id);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
             // Obtener el usuario actual
-            Optional<UserDTO> existingUser = Optional.ofNullable(userService.getUserById(id));
+            Optional<CreateUserDTO> existingUser = Optional.ofNullable(userService.getUserById(id));
             if (existingUser.isEmpty()) {
                 logger.warn("No se encontró el usuario con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario con ID: " + id);
@@ -133,7 +186,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar esta cuenta.");
             }
             // Realizar la actualización
-            UserDTO updatedUser = userService.updateUser(id, dto);
+            CreateUserDTO updatedUser = userService.updateUser(id, dto);
             logger.info("Usuario con ID {} actualizado exitosamente", id);
             return ResponseEntity.ok(updatedUser);
 

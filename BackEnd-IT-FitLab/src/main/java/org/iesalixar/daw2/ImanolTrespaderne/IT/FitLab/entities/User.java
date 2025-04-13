@@ -56,7 +56,7 @@ public class User {
 
     @NotNull(message = "La altura es obligatoria.")
     @Column(name = "height", precision = 5, scale = 2, nullable = false)
-    private BigDecimal height;
+    private Integer height;
 
     @NotNull(message = "El peso es obligatorio.")
     @Column(name = "weight", precision = 5, scale = 2, nullable = false)

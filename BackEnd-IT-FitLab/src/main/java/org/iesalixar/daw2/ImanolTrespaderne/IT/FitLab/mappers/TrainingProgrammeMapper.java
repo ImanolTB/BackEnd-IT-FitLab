@@ -13,7 +13,7 @@ public class TrainingProgrammeMapper {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UserMapper userMapper;
+    private CreateUserMapper userMapper;
 
 
 

@@ -61,7 +61,7 @@ public class DietFoodController {
             List<DietFoodDTO> actualizados = dietFoodService.replaceFoodsForDayAndType(dietId, dayWeek, mealType, nuevosAlimentos);
             return ResponseEntity.ok(actualizados);
         } catch (Exception e) {
-            logger.error("Error al reemplazar alimentos", e); // <-- Aquí va el stacktrace completo
+            logger.error("Error al reemplazar alimentos", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar alimentos.");
         }
     }
@@ -94,10 +94,7 @@ public class DietFoodController {
 
             List<DietFoodDTO> foods = dietFoodService.getFoodsByDayOfTheWeek(dietId,dayWeek);
 
-            if (foods.isEmpty()) {
-                logger.warn("No hay alimentos registrados en la dieta {} para el día {}", dietId, dayWeek);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron alimentos para ese día en la dieta.");
-            }
+
             return ResponseEntity.ok(foods);
         } catch (IllegalArgumentException e) {
             logger.warn("Día de la semana inválido: {}", dayWeek);
