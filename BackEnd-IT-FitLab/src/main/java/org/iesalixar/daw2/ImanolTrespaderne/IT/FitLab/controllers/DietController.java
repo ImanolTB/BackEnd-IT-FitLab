@@ -3,9 +3,6 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.FoodDTO;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Food;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.DietService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.FoodService;
@@ -19,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/diets")

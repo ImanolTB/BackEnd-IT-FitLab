@@ -2,7 +2,6 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers;
 
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class DietMapper {
 
     @Autowired
-    private UserMapper userMapper;
+    private CreateUserMapper userMapper;
 
 
 

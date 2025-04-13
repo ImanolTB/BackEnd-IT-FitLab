@@ -1,9 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingProgrammeDTO;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.TrainingProgrammeService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.UserService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
@@ -57,7 +55,7 @@ public class TrainingProgrammeController {
             String username = jwtUtil.getAuthenticatedUsername();
 
             // Verificar que el usuario autenticado corresponde con el solicitado
-            Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(userId));
+            Optional<CreateUserDTO> user = Optional.ofNullable(userService.getUserById(userId));
             if (user.isEmpty() || !user.get().getUsername().equals(username)) {
                 logger.warn("El usuario autenticado no tiene permiso para acceder a estos programas de entrenamiento.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para acceder a estos programas de entrenamiento.");

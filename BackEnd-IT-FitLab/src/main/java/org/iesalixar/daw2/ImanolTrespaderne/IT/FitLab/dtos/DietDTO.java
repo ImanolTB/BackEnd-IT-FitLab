@@ -3,8 +3,6 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 public class DietDTO {
@@ -12,5 +10,5 @@ public class DietDTO {
     private String name;
     private String description;
     private Integer durationWeeks;
-    private UserDTO user;
+    private CreateUserDTO user;
 }
