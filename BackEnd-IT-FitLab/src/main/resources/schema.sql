@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS diets (
 CREATE TABLE IF NOT EXISTS diet_food (
   diet_id INT NOT NULL,
   food_id INT NOT NULL,
-  quantity DECIMAL(5,2),
+  quantity DECIMAL(6,2),
   day_week ENUM('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'),
   meal_type ENUM('DESAYUNO','ALMUERZO','MERIENDA','CENA','SNACK'),
   PRIMARY KEY(diet_id, food_id, day_week, meal_type),

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class TrainingReviewDTO {
-    private UserDTO user;
+    private CreateUserDTO user;
     private TrainingProgrammeDTO trainingProgramme;
     private Integer score;
     private String comment;

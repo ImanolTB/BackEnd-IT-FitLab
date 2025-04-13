@@ -30,7 +30,7 @@ public class DietFood {
     @JoinColumn(name = "food_id", nullable = false)
     private Food food;
 
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal quantity ;
 
     public DietFood(Diet diet, Food food, DayOfTheWeek dayWeek, MealType mealType, BigDecimal quantity) {

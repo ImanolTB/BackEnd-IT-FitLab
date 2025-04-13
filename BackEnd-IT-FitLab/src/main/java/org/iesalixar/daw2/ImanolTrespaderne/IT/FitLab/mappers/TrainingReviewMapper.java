@@ -1,8 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers;
 
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingProgrammeDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingReviewDTO;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingReview;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingReviewPK;
@@ -16,7 +14,7 @@ import java.time.LocalDateTime;
 public class TrainingReviewMapper {
 
     @Autowired
-    private UserMapper userMapper;
+    private CreateUserMapper userMapper;
 
     @Autowired
     private TrainingProgrammeMapper trainingProgrammeMapper;
