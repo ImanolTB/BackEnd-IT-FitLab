@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class DietMapper {
 
     @Autowired
-    private CreateUserMapper userMapper;
+    private UserMapper userMapper;
 
 
 

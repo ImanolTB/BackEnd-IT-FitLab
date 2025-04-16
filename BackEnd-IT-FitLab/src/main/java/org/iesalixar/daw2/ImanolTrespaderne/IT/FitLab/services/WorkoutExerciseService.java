@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutExerciseDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercise;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercisePK;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +34,7 @@ public class WorkoutExerciseService {
                 .collect(Collectors.toList());
     }
 
-    public WorkoutExerciseDTO getWorkoutExerciseById(Long workoutId, Long exerciseId) {
+    public WorkoutExerciseDTO getWorkoutExerciseById(@PathVariable Long workoutId,@PathVariable Long exerciseId) {
         logger.info("Buscando relación Workout-Exercise con WorkoutID: {} y ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 
@@ -44,7 +47,7 @@ public class WorkoutExerciseService {
     }
 
     @Transactional
-    public WorkoutExerciseDTO createWorkoutExercise(WorkoutExerciseDTO dto) {
+    public WorkoutExerciseDTO createWorkoutExercise(@Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Creando nueva relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", dto.getWorkoutId(), dto.getExerciseId());
         try {
             WorkoutExercise workoutExercise = workoutExerciseMapper.toEntity(dto);
@@ -58,7 +61,7 @@ public class WorkoutExerciseService {
     }
 
     @Transactional
-    public WorkoutExerciseDTO updateWorkoutExercise(Long workoutId, Long exerciseId, WorkoutExerciseDTO dto) {
+    public WorkoutExerciseDTO updateWorkoutExercise(@PathVariable Long workoutId,@PathVariable Long exerciseId,@Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Actualizando relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 
@@ -82,7 +85,7 @@ public class WorkoutExerciseService {
     }
 
     @Transactional
-    public void deleteWorkoutExercise(Long workoutId, Long exerciseId) {
+    public void deleteWorkoutExercise(@PathVariable Long workoutId,@PathVariable Long exerciseId) {
         logger.info("Intentando eliminar relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 

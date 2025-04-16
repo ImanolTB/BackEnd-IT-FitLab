@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/trainingprogrammes")
+@RequestMapping("/api/v1/trainingProgrammes")
 public class TrainingProgrammeController {
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingProgrammeController.class);
@@ -76,6 +76,20 @@ public class TrainingProgrammeController {
         } catch (Exception e) {
             logger.error("Error inesperado en GET por usuario: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
+        }
+    }
+    @GetMapping("/generic")
+    public ResponseEntity<?> getGenericTrainingProgrammes() {
+        logger.info("Solicitud para listar programas genéricos ordenados por trainingLevel.");
+        try {
+            List<TrainingProgrammeDTO> programmes = programmeService.getGenericTrainingProgrammesSortedByTrainingLevel();
+            return ResponseEntity.ok(programmes);
+        } catch (IllegalArgumentException ex) {
+            logger.warn("Error en la solicitud: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (RuntimeException ex) {
+            logger.error("Error interno en el servidor: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al obtener los programas genéricos.");
         }
     }
     /**
