@@ -75,6 +75,8 @@ public class TrainingProgrammeService {
             throw new RuntimeException("Error al listar programas de entrenamiento genéricos.");
         }
     }
+
+
     public List<TrainingProgrammeDTO> getTrainingProgrammesByUserId(@PathVariable Long userId) {
         logger.info("Buscando programas de entrenamiento para el usuario con ID: {}", userId);
         if (!userRepository.existsById(userId)) {

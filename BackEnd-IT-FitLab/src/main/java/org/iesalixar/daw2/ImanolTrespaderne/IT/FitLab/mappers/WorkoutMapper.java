@@ -12,19 +12,20 @@ public class WorkoutMapper {
 
     @Autowired
     private TrainingProgrammeRepository trainingProgrammeRepository;
-
+@Autowired
+private TrainingProgrammeMapper trainingProgrammeMapper;
     public WorkoutDTO toDTO(Workout workout) {
         WorkoutDTO dto = new WorkoutDTO();
         dto.setId(workout.getId());
         dto.setName(workout.getName());
         dto.setDescription(workout.getDescription());
-        dto.setTrainingProgramme(workout.getTrainingProgramme().getId());
+        dto.setTrainingProgramme(trainingProgrammeMapper.toDTO(workout.getTrainingProgramme()) );
         dto.setSessionNumber(workout.getSessionNumber());
         return dto;
     }
 
     public Workout toEntity(WorkoutDTO dto) {
-        TrainingProgramme trainingProgramme = trainingProgrammeRepository.findById(dto.getTrainingProgramme())
+        TrainingProgramme trainingProgramme = trainingProgrammeRepository.findById(dto.getTrainingProgramme().getId())
                 .orElseThrow(() -> new RuntimeException("Programa de entrenamiento no encontrado"));
 
         Workout workout = new Workout();

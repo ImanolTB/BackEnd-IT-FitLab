@@ -9,5 +9,5 @@ public class WorkoutDTO {
     private String name;
     private String description;
     private Integer sessionNumber;
-    private Long trainingProgramme;
+    private TrainingProgrammeDTO trainingProgramme;
 }

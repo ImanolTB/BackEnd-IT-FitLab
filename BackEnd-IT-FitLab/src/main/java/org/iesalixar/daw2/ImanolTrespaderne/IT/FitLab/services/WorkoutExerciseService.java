@@ -45,7 +45,19 @@ public class WorkoutExerciseService {
                     return new IllegalArgumentException("Workout-Exercise no encontrado.");
                 });
     }
+    public List<WorkoutExerciseDTO> getExercisesByWorkoutId(Long workoutId) {
+        // Obtener la lista de relaciones para el workout dado
+        List<WorkoutExercise> workoutExercises = workoutExerciseRepository.findByWorkoutId(workoutId);
 
+        if (workoutExercises == null || workoutExercises.isEmpty()) {
+            throw new IllegalArgumentException("No se encontraron ejercicios para el workout con ID: " + workoutId);
+        }
+
+        // Convertir cada entidad a DTO usando el mapper manual
+        return workoutExercises.stream()
+                .map(workoutExerciseMapper::toDTO)
+                .collect(Collectors.toList());
+    }
     @Transactional
     public WorkoutExerciseDTO createWorkoutExercise(@Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Creando nueva relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", dto.getWorkoutId(), dto.getExerciseId());

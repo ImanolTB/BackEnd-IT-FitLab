@@ -48,11 +48,24 @@ public class WorkoutService {
                     return new IllegalArgumentException("Workout no encontrado.");
                 });
     }
+    public List<WorkoutDTO> getWorkoutsByTrainingProgrammeID(Long trainingProgrammeId) {
+        List<Workout> workouts = workoutRepository.findByTrainingProgrammeId(trainingProgrammeId);
 
+        // Lanzar excepción si no se encuentran sesiones (puedes optar por retornar lista vacía si la lógica así lo indica)
+        if (workouts == null || workouts.isEmpty()) {
+            throw new IllegalArgumentException("No se encontraron sesiones para el training programme con ID: " + trainingProgrammeId);
+        }
+
+        // Convertir cada entidad Workout a WorkoutDTO usando el mapper manual
+        return workouts.stream()
+                .map(workoutMapper::toDTO)
+                .collect(Collectors.toList());
+
+    }
     @Transactional
     public WorkoutDTO createWorkout(@Valid @RequestBody WorkoutDTO dto) {
         logger.info("Creando nuevo workout con nombre: {}", dto.getName());
-        TrainingProgramme programme = trainingProgrammeRepository.findById(dto.getTrainingProgramme())
+        TrainingProgramme programme = trainingProgrammeRepository.findById(dto.getTrainingProgramme().getId())
                 .orElseThrow(() -> {
                     logger.warn("Programa de entrenamiento con ID {} no encontrado.", dto.getTrainingProgramme());
                     return new IllegalArgumentException("Programa de entrenamiento no encontrado.");
