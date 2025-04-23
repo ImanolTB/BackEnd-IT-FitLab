@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingReviewDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.TrainingReviewService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
@@ -36,20 +37,7 @@ public class TrainingReviewController {
     }
 
 
-    @GetMapping("/{userId}/{programmeId}")
-    public ResponseEntity<?> getReview(@PathVariable Long userId, @PathVariable Long programmeId) {
-        logger.info("Solicitud para obtener reseña de userId {} y programmeId {}", userId, programmeId);
-        try {
-            String username = jwtUtil.getAuthenticatedUsername();
-            reviewService.validateReviewAccess(userId, programmeId, username);
-            return ResponseEntity.ok(reviewService.getReview(userId, programmeId));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error al obtener reseña compuesta: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reseña no encontrada.");
-        }
-    }
+
 
     @GetMapping("/programme/{programmeId}")
     public ResponseEntity<?> getReviewsByProgramme(@PathVariable Long programmeId) {
@@ -80,30 +68,29 @@ public class TrainingReviewController {
     }
 
 
-    // ✅ POST: CREAR
+
     @PostMapping
-    public ResponseEntity<?> createReview(@RequestBody TrainingReviewDTO dto) {
-        logger.info("Solicitud para crear reseña (user: {}, programme: {})",
-                dto.getUser().getId(), dto.getTrainingProgramme().getId());
+    public ResponseEntity<?> createReview(@Valid @RequestBody TrainingReviewDTO reviewDTO) {
+        logger.info("Solicitud para crear reseña");
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(dto));
+            TrainingReviewDTO createdReview = reviewService.createReview(reviewDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
         } catch (IllegalArgumentException e) {
             logger.warn("Error al crear reseña: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error inesperado al crear reseña: {}", e.getMessage());
+        } catch (RuntimeException e) {
+            logger.error("Error inesperado al crear reseña: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno al crear la reseña.");
         }
     }
 
-    @PutMapping("/{userId}/{programmeId}")
-    public ResponseEntity<?> updateReview(@RequestBody TrainingReviewDTO dto) {
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<?> updateReview(@PathVariable Long reviewId, @RequestBody TrainingReviewDTO dto) {
         logger.info("Solicitud para actualizar reseña ");
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            reviewService.validateReviewAccess(dto.getUser().getId(), dto.getTrainingProgramme().getId(), username);
-            return ResponseEntity.ok(reviewService.updateReview(dto));
+            return ResponseEntity.ok(reviewService.updateReview(reviewId,dto));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -116,14 +103,18 @@ public class TrainingReviewController {
         }
     }
 
-    @DeleteMapping("/{userId}/{programmeId}")
-    public ResponseEntity<?> deleteReview(@PathVariable Long userId,
-                                          @PathVariable Long programmeId) {
-        logger.info("Solicitud para eliminar reseña (user: {}, programme: {})", userId, programmeId);
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) {
+        logger.info("Solicitud para eliminar reseña con id: {}", reviewId);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            reviewService.validateReviewAccess(userId, programmeId, username);
-            reviewService.deleteReview(userId, programmeId);
+            // Obtenemos la reseña completa para formar el usuario asociado
+            TrainingReviewDTO dto = reviewService.getReview(reviewId);
+            // Validamos que el username del token coincida con el del usuario de la reseña
+
+
+            // Si la validación pasa, se procede a eliminar la reseña
+            reviewService.deleteReview(reviewId);
             return ResponseEntity.ok("Reseña eliminada con éxito.");
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -136,4 +127,5 @@ public class TrainingReviewController {
                     .body("Error interno al eliminar la reseña.");
         }
     }
+
 }

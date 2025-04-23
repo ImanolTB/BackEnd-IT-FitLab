@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Role;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,17 +41,17 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public CreateUserDTO getUserById(Long id) {
+    public CreateUserDTO getUserById(@PathVariable Long id) {
         return userRepository.findById(id)
                 .map(createUserMapper::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
-    public UserDTO getUserByUsername(String username) {
+    public UserDTO getUserByUsername(@PathVariable String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con username: " + username));
         return userMapper.toDTO(user);
     }
-    public boolean isUsernameTaken(String username) {
+    public boolean isUsernameTaken(@PathVariable String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre de usuario no puede estar vacío.");
         }
@@ -56,14 +59,14 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public boolean isEmailTaken(String email) {
+    public boolean isEmailTaken(@PathVariable String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("El email no puede estar vacío.");
         }
 
         return userRepository.findByEmail(email).isPresent();
     }
-    public CreateUserDTO createUser(CreateUserDTO dto) {
+    public CreateUserDTO createUser(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
@@ -73,7 +76,7 @@ public class UserService {
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
-    public CreateUserDTO createAdmin(CreateUserDTO dto) {
+    public CreateUserDTO createAdmin(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
@@ -83,7 +86,7 @@ public class UserService {
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
-    public CreateUserDTO updateUser(Long id, CreateUserDTO dto) {
+    public CreateUserDTO updateUser(@PathVariable Long id, CreateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         user.setName(dto.getName());
@@ -96,7 +99,7 @@ public class UserService {
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("Usuario no encontrado");
         }
@@ -104,14 +107,14 @@ public class UserService {
     }
 
 
-    public void deactivateUser(Long id) {
+    public void deactivateUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         user.setEnabled(false);
         userRepository.save(user);
     }
 
-    public void reactivateUserByEmail(String email) {
+    public void reactivateUserByEmail( @PathVariable String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
         if (user.isEnabled()) {

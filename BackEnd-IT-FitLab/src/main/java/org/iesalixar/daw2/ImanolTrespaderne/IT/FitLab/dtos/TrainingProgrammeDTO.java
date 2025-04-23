@@ -10,5 +10,5 @@ public class TrainingProgrammeDTO {
     private Boolean isGeneric;
     private TrainingLevel trainingLevel;
     private Integer durationWeeks;
-    private CreateUserDTO user;
+    private UserDTO user;
 }

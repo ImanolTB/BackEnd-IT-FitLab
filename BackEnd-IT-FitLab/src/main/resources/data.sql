@@ -153,10 +153,16 @@ INSERT IGNORE INTO workout_exercises (workout_id, exercise_id, sets, repetitions
 (4, 4, 4, 10, 12.5),
 (5, 5, 3, 12, 30.0);
 
--- Insertar training_reviews
-INSERT IGNORE INTO training_reviews (user_id, training_programme_id, score, comment) VALUES
-(1, 1, 5, 'Muy buen entrenamiento'),
-(2, 1, 4, 'Completo y accesible'),
-(3, 2, 3, 'Un poco fácil'),
-(4, 3, 5, 'Ideal para fuerza'),
-(5, 2, 4, 'Mejor de lo que esperaba');
+-- Insertar training_reviews con fecha especificada
+INSERT IGNORE INTO training_reviews (
+  user_id,
+  training_programme_id,
+  score,
+  comment,
+  date
+) VALUES
+(1, 1, 5, 'Muy buen entrenamiento', '2025-04-15 10:00:00'),
+(2, 1, 4, 'Completo y accesible',   '2025-04-15 10:05:00'),
+(3, 2, 3, 'Un poco fácil',          '2025-04-15 10:10:00'),
+(4, 3, 5, 'Ideal para fuerza',      '2025-04-15 10:15:00'),
+(5, 2, 4, 'Mejor de lo que esperaba','2025-04-15 10:20:00');

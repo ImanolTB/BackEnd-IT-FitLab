@@ -14,16 +14,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TrainingReview {
 
-    @EmbeddedId
-    private TrainingReviewPK id ;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  // Clave primaria autogenerada
 
-    @ManyToOne
-    @MapsId("userId")
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @MapsId("trainingProgrammeId")
+    @ManyToOne(optional = false)
     @JoinColumn(name = "training_programme_id")
     private TrainingProgramme trainingProgramme;
 
@@ -35,5 +34,4 @@ public class TrainingReview {
 
     @Column(name = "date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime date = LocalDateTime.now();
-
 }

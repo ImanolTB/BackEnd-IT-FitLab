@@ -1,6 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingProgrammeDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingProgrammeMapper;
@@ -12,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +49,7 @@ public class TrainingProgrammeService {
         }
     }
 
-    public TrainingProgrammeDTO getTrainingProgrammeById(Long id) {
+    public TrainingProgrammeDTO getTrainingProgrammeById(@PathVariable Long id) {
         logger.info("Buscando programa de entrenamiento con ID: {}", id);
         return programmeRepository.findById(id)
                 .map(programmeMapper::toDTO)
@@ -54,8 +58,26 @@ public class TrainingProgrammeService {
                     return new IllegalArgumentException("Programa de entrenamiento no encontrado.");
                 });
     }
+    public List<TrainingProgrammeDTO> getGenericTrainingProgrammesSortedByTrainingLevel() {
+        logger.info("Listando programas de entrenamiento genéricos organizados por trainingLevel...");
+        try {
+            return programmeRepository.findAll()
+                    .stream()
+                    // Filtra para obtener solo aquellos que son genéricos
+                    .filter(programme -> Boolean.TRUE.equals(programme.getIsGeneric()))
+                    // Ordena según el valor del enum TrainingLevel (puede usar su orden natural)
+                    .sorted(Comparator.comparing(TrainingProgramme::getTrainingLevel))
+                    // Convierte la entidad a DTO
+                    .map(programmeMapper::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error al listar programas de entrenamiento genéricos: {}", e.getMessage());
+            throw new RuntimeException("Error al listar programas de entrenamiento genéricos.");
+        }
+    }
 
-    public List<TrainingProgrammeDTO> getTrainingProgrammesByUserId(Long userId) {
+
+    public List<TrainingProgrammeDTO> getTrainingProgrammesByUserId(@PathVariable Long userId) {
         logger.info("Buscando programas de entrenamiento para el usuario con ID: {}", userId);
         if (!userRepository.existsById(userId)) {
             logger.warn("Usuario con ID {} no encontrado.", userId);
@@ -76,7 +98,7 @@ public class TrainingProgrammeService {
 
 
     @Transactional
-    public TrainingProgrammeDTO createTrainingProgramme(TrainingProgrammeDTO dto) {
+    public TrainingProgrammeDTO createTrainingProgramme(@Valid @RequestBody TrainingProgrammeDTO dto) {
         logger.info("Creando nuevo programa de entrenamiento: {}", dto.getName());
         if (dto.getUser().getId() == null || !userRepository.existsById(dto.getUser().getId())) {
             logger.warn("Intento de creación con usuario inválido: {}", dto.getUser().getId());
@@ -97,7 +119,7 @@ public class TrainingProgrammeService {
     }
 
     @Transactional
-    public TrainingProgrammeDTO updateTrainingProgramme(Long id, TrainingProgrammeDTO dto) {
+    public TrainingProgrammeDTO updateTrainingProgramme(@PathVariable Long id,@Valid @RequestBody TrainingProgrammeDTO dto) {
         logger.info("Actualizando programa de entrenamiento con ID: {}", id);
         TrainingProgramme programme = programmeRepository.findById(id)
                 .orElseThrow(() -> {
@@ -125,7 +147,7 @@ public class TrainingProgrammeService {
     }
 
     @Transactional
-    public void deleteTrainingProgramme(Long id) {
+    public void deleteTrainingProgramme(@PathVariable Long id) {
         logger.info("Intentando eliminar programa de entrenamiento con ID: {}", id);
         if (!programmeRepository.existsById(id)) {
             logger.warn("No se encontró el programa de entrenamiento con ID: {}", id);
@@ -140,7 +162,7 @@ public class TrainingProgrammeService {
         }
     }
 
-    public void validateOwnership(Long programmeId, String username) {
+    public void validateOwnership(  Long programmeId, String username) {
         if (isAdmin(username)) return;
 
         TrainingProgramme programme = programmeRepository.findById(programmeId)
