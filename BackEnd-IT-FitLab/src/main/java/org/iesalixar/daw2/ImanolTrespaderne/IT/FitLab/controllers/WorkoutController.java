@@ -40,7 +40,18 @@ public class WorkoutController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno.");
         }
     }
-
+    @GetMapping("/{id}/workouts")
+    public ResponseEntity<?> getWorkoutsByTrainingProgramme(@PathVariable Long id) {
+        try {
+            List<WorkoutDTO> workouts = workoutService.getWorkoutsByTrainingProgrammeID(id);
+            return ResponseEntity.ok(workouts);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            // Aquí se puede utilizar un logger para registrar el error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno.");
+        }
+    }
     @PostMapping
     public ResponseEntity<?> createWorkout(@Valid @RequestBody WorkoutDTO dto) {
         logger.info("Solicitud para crear workout.");

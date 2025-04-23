@@ -109,12 +109,12 @@ CREATE TABLE IF NOT EXISTS workout_exercises (
 
 -- 11. Tabla training_reviews
 CREATE TABLE IF NOT EXISTS training_reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT NOT NULL,
   training_programme_id INT NOT NULL,
-  score INT CHECK (score >= 1 AND score <= 5),
-  comment TEXT,
-  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, training_programme_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (training_programme_id) REFERENCES training_programmes(id) ON DELETE CASCADE ON UPDATE CASCADE
+  score INTEGER,
+  comment VARCHAR(255),
+  date TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (training_programme_id) REFERENCES training_programmes(id)
 );

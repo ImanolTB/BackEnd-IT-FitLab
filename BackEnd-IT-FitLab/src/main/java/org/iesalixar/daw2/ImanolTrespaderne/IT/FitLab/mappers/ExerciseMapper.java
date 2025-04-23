@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers;
 
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.ExerciseCreateDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.ExerciseDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Exercise;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,14 @@ public class ExerciseMapper {
         exercise.setId(dto.getId());
         exercise.setName(dto.getName());
         exercise.setVideoUrl(dto.getVideoUrl());
+        exercise.setMuscleGroup(dto.getMuscleGroup());
+        return exercise;
+    }
+
+    public Exercise toEntity(ExerciseCreateDTO dto) {
+        Exercise exercise = new Exercise();
+        exercise.setId(dto.getId());
+        exercise.setName(dto.getName());
         exercise.setMuscleGroup(dto.getMuscleGroup());
         return exercise;
     }

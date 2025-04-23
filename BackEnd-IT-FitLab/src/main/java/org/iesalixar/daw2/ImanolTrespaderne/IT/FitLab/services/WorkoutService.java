@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Workout;
@@ -11,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +39,7 @@ public class WorkoutService {
                 .collect(Collectors.toList());
     }
 
-    public WorkoutDTO getWorkoutById(Long id) {
+    public WorkoutDTO getWorkoutById(@PathVariable Long id) {
         logger.info("Buscando workout con ID: {}", id);
         return workoutRepository.findById(id)
                 .map(workoutMapper::toDTO)
@@ -45,11 +48,24 @@ public class WorkoutService {
                     return new IllegalArgumentException("Workout no encontrado.");
                 });
     }
+    public List<WorkoutDTO> getWorkoutsByTrainingProgrammeID(Long trainingProgrammeId) {
+        List<Workout> workouts = workoutRepository.findByTrainingProgrammeId(trainingProgrammeId);
 
+        // Lanzar excepción si no se encuentran sesiones (puedes optar por retornar lista vacía si la lógica así lo indica)
+        if (workouts == null || workouts.isEmpty()) {
+            throw new IllegalArgumentException("No se encontraron sesiones para el training programme con ID: " + trainingProgrammeId);
+        }
+
+        // Convertir cada entidad Workout a WorkoutDTO usando el mapper manual
+        return workouts.stream()
+                .map(workoutMapper::toDTO)
+                .collect(Collectors.toList());
+
+    }
     @Transactional
-    public WorkoutDTO createWorkout(WorkoutDTO dto) {
+    public WorkoutDTO createWorkout(@Valid @RequestBody WorkoutDTO dto) {
         logger.info("Creando nuevo workout con nombre: {}", dto.getName());
-        TrainingProgramme programme = trainingProgrammeRepository.findById(dto.getTrainingProgramme())
+        TrainingProgramme programme = trainingProgrammeRepository.findById(dto.getTrainingProgramme().getId())
                 .orElseThrow(() -> {
                     logger.warn("Programa de entrenamiento con ID {} no encontrado.", dto.getTrainingProgramme());
                     return new IllegalArgumentException("Programa de entrenamiento no encontrado.");
@@ -67,7 +83,7 @@ public class WorkoutService {
     }
 
     @Transactional
-    public WorkoutDTO updateWorkout(Long id, WorkoutDTO dto) {
+    public WorkoutDTO updateWorkout(@PathVariable Long id,@Valid @RequestBody WorkoutDTO dto) {
         logger.info("Actualizando workout con ID: {}", id);
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> {
@@ -89,7 +105,7 @@ public class WorkoutService {
     }
 
     @Transactional
-    public void deleteWorkout(Long id) {
+    public void deleteWorkout(@PathVariable Long id) {
         logger.info("Intentando eliminar workout con ID: {}", id);
         if (!workoutRepository.existsById(id)) {
             logger.warn("Intento de eliminar workout inexistente con ID: {}", id);

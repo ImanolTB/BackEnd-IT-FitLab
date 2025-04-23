@@ -1,27 +1,34 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingReviewDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingReview;
-import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingReviewPK;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.User;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingProgrammeMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.TrainingReviewMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.CreateUserMapper;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.UserMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.TrainingProgrammeRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.TrainingReviewRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class TrainingReviewService {
+    private static final Logger logger = LoggerFactory.getLogger(TrainingReview.class);
 
     @Autowired
-    private CreateUserMapper userMapper;
+    private UserMapper userMapper;
 
     @Autowired
     private TrainingProgrammeMapper trainingProgrammeMapper;
@@ -36,7 +43,8 @@ public class TrainingReviewService {
 
     @Autowired
     private TrainingProgrammeRepository programmeRepository;
-
+    @Autowired
+    private JwtUtil jwtUtil;
     public List<TrainingReviewDTO> getAllReviews() {
         return reviewRepository.findAll()
                 .stream()
@@ -44,21 +52,20 @@ public class TrainingReviewService {
                 .collect(Collectors.toList());
     }
 
-    public TrainingReviewDTO getReview(Long userId, Long programmeId) {
-        TrainingReviewPK pk = new TrainingReviewPK(userId, programmeId);
-        return reviewRepository.findById(pk)
+    public TrainingReviewDTO getReview(@PathVariable Long reviewId) {
+        return reviewRepository.findById(reviewId)
                 .map(reviewMapper::toDTO)
                 .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
     }
 
-    public List<TrainingReviewDTO> getReviewsByUser(Long userId) {
+    public List<TrainingReviewDTO> getReviewsByUser(@PathVariable Long userId) {
         return reviewRepository.findByUserId(userId)
                 .stream()
                 .map(reviewMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<TrainingReviewDTO> getReviewsByTrainingProgramme(Long programmeId) {
+    public List<TrainingReviewDTO> getReviewsByTrainingProgramme(@PathVariable Long programmeId) {
         return reviewRepository.findByTrainingProgrammeId(programmeId)
                 .stream()
                 .map(reviewMapper::toDTO)
@@ -66,25 +73,32 @@ public class TrainingReviewService {
     }
 
     public TrainingReviewDTO createReview(TrainingReviewDTO dto) {
-        Long userId = dto.getUser().getId();
-        Long programmeId = dto.getTrainingProgramme().getId();
+        // 1. Obtener username del token
+        String username = jwtUtil.getAuthenticatedUsername();
+        if (username == null) {
+            throw new SecurityException("Usuario no autenticado.");
+        }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        TrainingProgramme programme = programmeRepository.findById(programmeId)
-                .orElseThrow(() -> new RuntimeException("Programa de entrenamiento no encontrado"));
+        // 2. Buscar el usuario real en la BD
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));
 
+        // 3. Convertir el DTO a entidad
         TrainingReview review = reviewMapper.toEntity(dto);
-        return reviewMapper.toDTO(reviewRepository.save(review));
-    }
 
-    public TrainingReviewDTO updateReview( TrainingReviewDTO dto) {
-        User user = userMapper.toEntity(dto.getUser());
-        TrainingProgramme trainingProgramme= trainingProgrammeMapper.toEntity(dto.getTrainingProgramme());
-        Long userId= user.getId();
-        Long programmeId= trainingProgramme.getId();
-        TrainingReviewPK pk = new TrainingReviewPK(userId, programmeId);
-        TrainingReview review = reviewRepository.findById(pk)
+        // 4. Asignar el usuario a la entidad
+        review.setUser(user);
+
+        // 5. Guardar la reseña
+        TrainingReview saved = reviewRepository.save(review);
+
+        // 6. Devolver la reseña convertida a DTO
+        return reviewMapper.toDTO(saved);
+    }
+    public TrainingReviewDTO updateReview(@PathVariable Long reviewId,@Valid @RequestBody TrainingReviewDTO dto) {
+
+
+        TrainingReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Reseña no encontrada"));
 
         review.setScore(dto.getScore());
@@ -93,15 +107,14 @@ public class TrainingReviewService {
         return reviewMapper.toDTO(reviewRepository.save(review));
     }
 
-    public void deleteReview(Long userId, Long programmeId) {
-        TrainingReviewPK pk = new TrainingReviewPK(userId, programmeId);
-        if (!reviewRepository.existsById(pk)) {
+    public void deleteReview(@PathVariable Long reviewId) {
+        if (!reviewRepository.existsById(reviewId)) {
             throw new IllegalArgumentException("Reseña no encontrada");
         }
-        reviewRepository.deleteById(pk);
+        reviewRepository.deleteById(reviewId);
     }
 
-    public void validateReviewAccess(Long userId, Long programmeId, String username) {
+    public void validateReviewAccess( Long userId, Long programmeId, String username) {
         if (isAdmin(username)) return; // acceso total para admins
 
         TrainingProgramme programme = programmeRepository.findById(programmeId)

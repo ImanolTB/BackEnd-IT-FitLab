@@ -1,6 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import jakarta.validation.Valid;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.ExerciseCreateDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.ExerciseDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.ExerciseService;
 import org.slf4j.Logger;
@@ -42,8 +43,8 @@ public class ExerciseController {
         }
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<?> createExercise(@Valid @RequestBody ExerciseDTO dto) {
+    @PostMapping (consumes = "multipart/form-data")
+    public ResponseEntity<?> createExercise(@Valid @ModelAttribute ExerciseCreateDTO dto) {
         logger.info("Recibiendo solicitud para crear un nuevo ejercicio.");
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
@@ -56,8 +57,8 @@ public class ExerciseController {
         }
     }
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateExercise(@PathVariable Long id, @Valid @RequestBody ExerciseDTO dto) {
+    @PutMapping(value="/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> updateExercise(@PathVariable Long id, @Valid @ModelAttribute ExerciseCreateDTO dto) {
         logger.info("Recibiendo solicitud para actualizar ejercicio con ID: {}", id);
         try {
             return ResponseEntity.ok(exerciseService.updateExercise(id, dto));

@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.DietMapper;
@@ -8,7 +9,10 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepositor
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,13 +43,13 @@ public class DietService {
         }
     }
 
-    public DietDTO getDietById(Long id) {
+    public DietDTO getDietById(@PathVariable Long id) {
         return dietRepository.findById(id)
                 .map(dietMapper::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
     }
 
-    public List<DietDTO> getDietByUsername(String username) {
+    public List<DietDTO> getDietByUsername(@PathVariable String username) {
         try {
             List<Diet> diets = dietRepository.findByUserUsername(username);
 
@@ -61,7 +65,7 @@ public class DietService {
         }
     }
 
-    public DietDTO createDiet(DietDTO dto) {
+    public DietDTO createDiet(@Valid @RequestBody DietDTO dto) {
         try {
             Diet diet = dietMapper.toEntity(dto);
             return dietMapper.toDTO(dietRepository.save(diet));
@@ -70,7 +74,7 @@ public class DietService {
         }
     }
 
-    public DietDTO updateDiet(Long id, DietDTO dto) {
+    public DietDTO updateDiet(@PathVariable Long id,@Valid @RequestBody DietDTO dto) {
         try {
             Diet diet = dietRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
@@ -83,7 +87,7 @@ public class DietService {
         }
     }
 
-    public void deleteDiet(Long id) {
+    public void deleteDiet(@PathVariable Long id) {
         try {
             dietRepository.deleteById(id);
         } catch (Exception e) {

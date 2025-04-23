@@ -1,6 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietFoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Diet;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.DietFood;
@@ -14,6 +15,8 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.DietRepositor
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,7 +41,7 @@ public class DietFoodService {
      * Añade un alimento a una dieta con la cantidad, día de la semana y tipo de comida especificados.
      */
     @Transactional
-    public DietFoodDTO addFoodToDiet(DietFoodDTO dto) {
+    public DietFoodDTO addFoodToDiet(@Valid @RequestBody DietFoodDTO dto) {
         DietFood dietFood = dietFoodMapper.toEntity(dto);
         return dietFoodMapper.toDTO(dietFoodRepository.save(dietFood));
     }
@@ -47,7 +50,7 @@ public class DietFoodService {
      * Elimina un alimento de una dieta para un día y tipo de comida específicos.
      */
     @Transactional
-    public void removeFoodFromDiet(DietFoodDTO dto) {
+    public void removeFoodFromDiet(@Valid @RequestBody DietFoodDTO dto) {
         DietFoodPK id = new DietFoodPK(dto.getDietId(),dto.getFoodId() , dto.getDayWeek(), dto.getMealType());
 
         Optional<DietFood> dietFood = dietFoodRepository.findById(id);
@@ -61,7 +64,7 @@ public class DietFoodService {
     }
 
     @Transactional
-    public List<DietFoodDTO> replaceFoodsForDayAndType(Long dietId, DayOfTheWeek day, MealType type, List<DietFoodDTO> nuevosAlimentos) {
+    public List<DietFoodDTO> replaceFoodsForDayAndType(@PathVariable Long dietId,@PathVariable DayOfTheWeek day,@PathVariable MealType type,@Valid @RequestBody List<DietFoodDTO> nuevosAlimentos) {
         // Validaciones básicas
         if (dietId == null || day == null || type == null) {
             throw new IllegalArgumentException("Día, tipo de comida y dieta no pueden ser nulos.");
@@ -104,7 +107,7 @@ public class DietFoodService {
     /**
      * Obtiene todos los alimentos de una dieta específica.
      */
-    public List<DietFoodDTO> getFoodsByDayOfTheWeek(Long dietId, DayOfTheWeek dayWeek) {
+    public List<DietFoodDTO> getFoodsByDayOfTheWeek(@PathVariable Long dietId,@PathVariable DayOfTheWeek dayWeek) {
         return dietFoodRepository.findById_DietIdAndId_DayWeek(dietId, dayWeek)
                 .stream()
                 .map(dietFoodMapper::toDTO)
