@@ -1,7 +1,6 @@
 -- Insertar roles
 INSERT IGNORE INTO roles (name) VALUES
 ('ROLE_ADMIN'), ('ROLE_USER');
-
 -- Insertar usuarios
 INSERT IGNORE INTO users (username, password, email, name, last_name, age, height, weight, gender, activity_level, enabled) VALUES
 ('itrebar', '$2a$10$U21WY06zsEaQsujpRS7H4.CqkhkvkOKIhwkBkSD.0VR9x./fsUDfC', 'user1@example.com', 'Imanol', 'Trespaderne', 25, 175.5, 70.0, 'M', 'MODERADO', true),
