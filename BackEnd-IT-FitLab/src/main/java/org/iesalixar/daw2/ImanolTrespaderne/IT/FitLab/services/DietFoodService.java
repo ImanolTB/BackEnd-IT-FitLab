@@ -64,27 +64,24 @@ public class DietFoodService {
     }
 
     @Transactional
-    public List<DietFoodDTO> replaceFoodsForDayAndType(@PathVariable Long dietId,@PathVariable DayOfTheWeek day,@PathVariable MealType type,@Valid @RequestBody List<DietFoodDTO> nuevosAlimentos) {
-        // Validaciones básicas
+    public List<DietFoodDTO> replaceFoodsForDayAndType(Long dietId, DayOfTheWeek day, MealType type, List<DietFoodDTO> nuevosAlimentos) {
         if (dietId == null || day == null || type == null) {
             throw new IllegalArgumentException("Día, tipo de comida y dieta no pueden ser nulos.");
         }
 
-        // Validación de cantidades y alimentos
         for (DietFoodDTO dto : nuevosAlimentos) {
             if (dto.getFoodId() == null || dto.getQuantity() == null || dto.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Los alimentos deben tener foodId y una cantidad válida mayor que 0.");
             }
         }
 
-        // Cargar la dieta
         Diet diet = dietRepository.findById(dietId)
                 .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada con ID: " + dietId));
 
-        // Eliminar existentes
-        dietFoodRepository.deleteByDietIdAndDayWeekAndMealType(dietId, day, type);
+        // 🔵 Nuevo: forzar un SELECT para bloquear filas antes del DELETE
+        List<DietFood> foodsToDelete = dietFoodRepository.findById_DietIdAndId_DayWeekAndId_MealType(dietId, day, type);
+        dietFoodRepository.deleteAll(foodsToDelete);
 
-        // Convertir y guardar nuevos
         List<DietFood> nuevasEntidades = nuevosAlimentos.stream().map(dto -> {
             Food food = foodRepository.findById(dto.getFoodId())
                     .orElseThrow(() -> new IllegalArgumentException("Alimento no encontrado con ID: " + dto.getFoodId()));
@@ -104,6 +101,7 @@ public class DietFoodService {
                 .map(dietFoodMapper::toDTO)
                 .toList();
     }
+
     /**
      * Obtiene todos los alimentos de una dieta específica.
      */

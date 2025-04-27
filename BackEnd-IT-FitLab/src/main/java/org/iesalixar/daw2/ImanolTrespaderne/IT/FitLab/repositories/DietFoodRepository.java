@@ -28,6 +28,7 @@ public interface DietFoodRepository extends JpaRepository<DietFood, DietFoodPK> 
 
 
     Optional<DietFood> findById(DietFoodPK id);
+    List<DietFood> findById_DietIdAndId_DayWeekAndId_MealType(Long dietId, DayOfTheWeek dayWeek, MealType mealType);
 
     void deleteById(DietFoodPK id);
 }
