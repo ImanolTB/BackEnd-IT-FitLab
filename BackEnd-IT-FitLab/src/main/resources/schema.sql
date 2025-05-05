@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS diets (
   name VARCHAR(100) NOT NULL,
   description VARCHAR(100),
   duration_weeks INT,
+  goal ENUM('PERDER_PESO','GANAR_MASA_MUSCULAR','MANTENIMIENTO'),
   user_id BIGINT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
   UNIQUE (name, user_id, description, duration_weeks)

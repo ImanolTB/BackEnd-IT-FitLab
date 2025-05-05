@@ -68,12 +68,12 @@ INSERT IGNORE INTO food (name, calories, proteins, carbohydrates, fats) VALUES
 
 
 -- Insertar dietas
-INSERT IGNORE INTO diets (name, description, duration_weeks, user_id) VALUES
-('Dieta Fit', 'Alta en proteínas', 4, 1),
-('Dieta Vegana', 'Solo vegetal', 6, 2),
-('Dieta Keto', 'Baja en carbos', 8, 3),
-('Dieta Mediterránea', 'Equilibrada', 5, 4),
-('Dieta Detox', 'Depurativa', 3, 5);
+INSERT IGNORE INTO diets (name, description, duration_weeks, goal, user_id) VALUES
+('Dieta Fit', 'Alta en proteínas', 4,'GANAR_MASA_MUSCULAR', 1),
+('Dieta Vegana', 'Solo vegetal', 6,'GANAR_MASA_MUSCULAR', 2),
+('Dieta Keto', 'Baja en carbos', 8,'PERDER_PESO', 3),
+('Dieta Mediterránea', 'Equilibrada', 5,'MANTENIMIENTO', 4),
+('Dieta Detox', 'Depurativa', 3,'GANAR_MASA_MUSCULAR', 5);
 
 -- Insertar todas las comidas de la semana para 'itrebar' (dieta_id = 1)
 INSERT IGNORE INTO diet_food (diet_id, food_id, quantity, day_week, meal_type) VALUES
