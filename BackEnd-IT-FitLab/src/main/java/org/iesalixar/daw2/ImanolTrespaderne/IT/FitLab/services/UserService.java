@@ -2,7 +2,9 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UpdateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserTDEEDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Role;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.User;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.CreateUserMapper;
@@ -41,11 +43,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public CreateUserDTO getUserById(@PathVariable Long id) {
+    public UpdateUserDTO getUserById(@PathVariable Long id) {
         return userRepository.findById(id)
-                .map(createUserMapper::toDTO)
+                .map(userMapper::toUpdateDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
+
     public UserDTO getUserByUsername(@PathVariable String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con username: " + username));
@@ -76,6 +79,7 @@ public class UserService {
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
+
     public CreateUserDTO createAdmin(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -85,16 +89,21 @@ public class UserService {
         user.setRoles(Collections.singleton(role));
         return createUserMapper.toDTO(userRepository.save(user));
     }
-
+    public UserTDEEDTO getTDEEData(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return userMapper.toTDEEDTO(user);
+    }
     public CreateUserDTO updateUser(@PathVariable Long id, CreateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         user.setName(dto.getName());
         user.setLastName(dto.getLastName());
-        user.setAge(dto.getAge());
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
-        user.setGender(dto.getGender());
+        user.setAge(dto.getAge());
         user.setActivityLevel(dto.getActivityLevel());
         return createUserMapper.toDTO(userRepository.save(user));
     }
