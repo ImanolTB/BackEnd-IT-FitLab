@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/api/v1/exercises",
                                 "/api/videos/{filename}",
                                 "/api/v1/user/username/{username}",
+                                "/api/v1/user/tdee",
                                 "/api/v1/workoutexercises",
                                 "/api/v1/workouts/{id}/workouts",
                                 "/api/v1/workoutexercises/workout/{workoutId}",
