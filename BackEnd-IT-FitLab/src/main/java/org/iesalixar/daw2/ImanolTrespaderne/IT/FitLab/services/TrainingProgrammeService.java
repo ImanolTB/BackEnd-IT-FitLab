@@ -167,7 +167,9 @@ public class TrainingProgrammeService {
 
         TrainingProgramme programme = programmeRepository.findById(programmeId)
                 .orElseThrow(() -> new IllegalArgumentException("Programa de entrenamiento no encontrado"));
-
+         if(programme.getIsGeneric()) {
+             return;
+         }
         if (!programme.getUser().getUsername().equals(username)) {
             throw new SecurityException("No tienes permiso para modificar este programa de entrenamiento.");
         }
