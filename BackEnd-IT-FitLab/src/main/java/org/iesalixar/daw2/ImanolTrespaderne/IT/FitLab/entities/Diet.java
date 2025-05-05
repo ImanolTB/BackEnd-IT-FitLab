@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.Goal;
 
 @Entity
 @Table(name = "diets")
@@ -29,6 +30,11 @@ public class Diet {
     @NotNull(message = "La duración de la dieta en semanas es obligatoria.")
     @Column(name = "duration_weeks",nullable = false)
     private Integer durationWeeks;
+
+    @NotNull(message = "Establecer un objetivo es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "goal",nullable = false)
+    private Goal goal;
 
     @NotNull(message = "El usuario asociado a la dieta es obligatorio.")
     @ManyToOne

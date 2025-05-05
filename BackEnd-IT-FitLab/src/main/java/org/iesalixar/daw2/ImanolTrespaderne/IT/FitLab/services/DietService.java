@@ -81,6 +81,7 @@ public class DietService {
             diet.setDescription(dto.getDescription());
             diet.setName(dto.getName());
             diet.setDurationWeeks(dto.getDurationWeeks());
+            diet.setGoal(dto.getGoal());
             return dietMapper.toDTO(dietRepository.save(diet));
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar la dieta.");

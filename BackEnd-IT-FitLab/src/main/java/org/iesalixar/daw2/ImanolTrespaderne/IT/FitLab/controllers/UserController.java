@@ -1,8 +1,11 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import jakarta.validation.Valid;
+import org.hibernate.sql.Update;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UpdateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UserTDEEDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.UserService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.slf4j.Logger;
@@ -57,7 +60,7 @@ public class UserController {
         try {
             String username = jwtUtil.getAuthenticatedUsername();
 
-            Optional<CreateUserDTO> user = Optional.ofNullable(userService.getUserById(id));
+            Optional<UpdateUserDTO> user = Optional.ofNullable(userService.getUserById(id));
             if (user.isEmpty()) {
                 logger.warn("No se encontró el usuario con ID: {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario con ID: " + id);
@@ -77,6 +80,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
+
 
 
     /**
@@ -114,15 +118,31 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el usuario.");
         }
     }
+    @GetMapping("/tdee")
+    public ResponseEntity<UserTDEEDTO> getTdeeData() {
+        logger.info("Solicitando datos de TDEE para el usuario ");
+        String username= jwtUtil.getAuthenticatedUsername();
+        try {
+            UserTDEEDTO tdeeData = userService.getTDEEData(username);
+            logger.info("Datos de TDEE encontrados para el usuario con nombre de usuario: {}", username);
+            return ResponseEntity.ok(tdeeData);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Usuario no encontrado con id: {}", username);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            logger.error("Error al obtener los datos de TDEE para el usuario con nombre de usuario {}: {}", username, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
         try {
             UserDTO userDTO = userService.getUserByUsername(username);
             return ResponseEntity.ok(userDTO);
         } catch (NoSuchElementException ex) {
-            return ResponseEntity.status(404).body("Usuario no encontrado: " + username);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado: " + username);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body("Error interno del servidor.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
     @GetMapping("/check-username/{username}")
@@ -175,7 +195,7 @@ public class UserController {
         try {
             String username = jwtUtil.getAuthenticatedUsername();
             // Obtener el usuario actual
-            Optional<CreateUserDTO> existingUser = Optional.ofNullable(userService.getUserById(id));
+            Optional<UpdateUserDTO> existingUser = Optional.ofNullable(userService.getUserById(id));
             if (existingUser.isEmpty()) {
                 logger.warn("No se encontró el usuario con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario con ID: " + id);
@@ -203,7 +223,7 @@ public class UserController {
     /**
      * Eliminar un usuario por ID.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')or hasRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         logger.info("Intentando eliminar el usuario con ID {}", id);
@@ -224,7 +244,7 @@ public class UserController {
             String username = jwtUtil.getAuthenticatedUsername();
             userService.validateUserOwnership(id, username);
             userService.deactivateUser(id);
-            return ResponseEntity.ok("Cuenta desactivada correctamente.");
+            return ResponseEntity.status(HttpStatus.OK).body("Cuenta desativada correctamente");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (SecurityException e) {

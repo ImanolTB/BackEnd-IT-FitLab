@@ -12,7 +12,6 @@ public class DietMapper {
     private UserMapper userMapper;
 
 
-
     public DietDTO toDTO(Diet diet) {
         if (diet == null) {
             return null;
@@ -23,6 +22,7 @@ public class DietMapper {
         dto.setName(diet.getName());
         dto.setDescription(diet.getDescription());
         dto.setDurationWeeks(diet.getDurationWeeks());
+        dto.setGoal(diet.getGoal());
         if (diet.getUser() != null) {
             dto.setUser(userMapper.toDTO(diet.getUser())); // Convertimos User a UserDTO
         }
@@ -39,7 +39,7 @@ public class DietMapper {
         diet.setName(dto.getName());
         diet.setDescription(dto.getDescription());
         diet.setDurationWeeks(dto.getDurationWeeks());
-
+        diet.setGoal((dto.getGoal()));
         if (dto.getUser() != null) {
             diet.setUser(userMapper.toEntity(dto.getUser())); // Convertimos UserDTO a User
         }
