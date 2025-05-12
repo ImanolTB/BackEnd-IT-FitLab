@@ -12,12 +12,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateUserDTO {
+    private Long id;
     private String username;
     private String email;
     private String name;
     private String lastName;
     private Integer age;
     private Integer height;
+    private boolean enabled;
     private BigDecimal weight;
     private ActivityLevel activityLevel;
 }

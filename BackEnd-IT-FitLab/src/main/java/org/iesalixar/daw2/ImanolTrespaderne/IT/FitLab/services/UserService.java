@@ -37,9 +37,9 @@ public class UserService {
    @Autowired
    private PasswordEncoder passwordEncoder;
 
-    public List<CreateUserDTO> getAllUsers() {
+    public List<UpdateUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(createUserMapper::toDTO)
+                .map(userMapper::toUpdateDTO)
                 .collect(Collectors.toList());
     }
 
@@ -103,7 +103,12 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
-        user.setAge(dto.getAge());
+        if (dto.getAge()<1) {
+            throw  new IllegalArgumentException("La edad debe ser mayor de 0");
+        }else{
+            user.setAge(dto.getAge());
+        }
+
         user.setActivityLevel(dto.getActivityLevel());
         return createUserMapper.toDTO(userRepository.save(user));
     }
@@ -127,7 +132,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
         if (user.isEnabled()) {
-            throw new IllegalArgumentException("La cuenta ya está activa.");
+            throw new IllegalStateException("La cuenta ya está activa.");
         }
         user.setEnabled(true);
         userRepository.save(user);

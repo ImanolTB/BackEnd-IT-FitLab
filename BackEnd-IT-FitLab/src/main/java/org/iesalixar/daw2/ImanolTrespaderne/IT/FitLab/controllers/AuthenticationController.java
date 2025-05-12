@@ -1,5 +1,10 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.AuthRequestDTO;
@@ -22,6 +27,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Autenticación", description = "Operaciones relacionadas con el login de usuarios")
+
 public class AuthenticationController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -31,7 +38,18 @@ public class AuthenticationController {
 
     @Autowired
     private UserRepository userRepository;
-
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login exitoso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Username o password vacíos",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Usuario deshabilitado",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+                    content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> authenticate(@Valid @RequestBody AuthRequestDTO authRequest){
       try {
@@ -67,9 +85,5 @@ public class AuthenticationController {
       }
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<AuthResponseDTO> handleException(Exception e){
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new AuthResponseDTO(null, "Ocurrió un error inesperado "+ e.getMessage()));
-    }
+
 }
