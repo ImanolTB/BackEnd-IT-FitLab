@@ -1,6 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import org.hibernate.sql.Update;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UpdateUserDTO;
@@ -35,10 +36,10 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<CreateUserDTO>> getAllUsers() {
+    public ResponseEntity<List<UpdateUserDTO>> getAllUsers() {
         logger.info("Solicitando la lista de todos los usuarios...");
         try {
-            List<CreateUserDTO> users = userService.getAllUsers();
+            List<UpdateUserDTO> users = userService.getAllUsers();
             if (users.isEmpty()) {
                 logger.warn("No hay usuarios registrados.");
                 return ResponseEntity.noContent().build();
@@ -67,20 +68,18 @@ public class UserController {
             }
 
             // Verificar que el usuario autenticado es el mismo que el solicitado
-            if (!user.get().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para acceder a la información del usuario con ID: {}", id);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para acceder a esta información.");
-            }
 
             logger.info("Usuario con ID {} encontrado: {}", id, user.get());
             return ResponseEntity.ok(user.get());
 
+        } catch (ValidationException e) {
+            logger.warn("El usuario autenticado no tiene permiso para acceder a la información del usuario con ID: {}", id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para acceder a esta información.");
         } catch (Exception e) {
             logger.error("Error al buscar el usuario con ID {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
-
 
 
     /**
@@ -100,6 +99,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el usuario.");
         }
     }
+
     /**
      * Crear un nuevo usuario administrador.
      */
@@ -118,10 +118,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el usuario.");
         }
     }
+
     @GetMapping("/tdee")
     public ResponseEntity<UserTDEEDTO> getTdeeData() {
         logger.info("Solicitando datos de TDEE para el usuario ");
-        String username= jwtUtil.getAuthenticatedUsername();
+        String username = jwtUtil.getAuthenticatedUsername();
         try {
             UserTDEEDTO tdeeData = userService.getTDEEData(username);
             logger.info("Datos de TDEE encontrados para el usuario con nombre de usuario: {}", username);
@@ -134,6 +135,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
         try {
@@ -145,6 +147,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
+
     @GetMapping("/check-username/{username}")
     public ResponseEntity<?> checkUsernameAvailability(@PathVariable String username) {
         logger.info("Verificando disponibilidad del username: {}", username);
@@ -186,31 +189,29 @@ public class UserController {
                     .body("Error interno del servidor al verificar el email.");
         }
     }
+
     /**
      * Actualizar un usuario existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody CreateUserDTO dto) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserDTO dto) {
         logger.info("Intentando actualizar el usuario con ID {}", id);
         try {
-            String username = jwtUtil.getAuthenticatedUsername();
             // Obtener el usuario actual
             Optional<UpdateUserDTO> existingUser = Optional.ofNullable(userService.getUserById(id));
             if (existingUser.isEmpty()) {
                 logger.warn("No se encontró el usuario con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario con ID: " + id);
             }
-            // Validar que el usuario autenticado es el propietario de la cuenta
-            if (!existingUser.get().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para actualizar el usuario con ID {}", id);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar esta cuenta.");
-            }
             // Realizar la actualización
-            CreateUserDTO updatedUser = userService.updateUser(id, dto);
+            UpdateUserDTO updatedUser = userService.updateUser(id, dto);
             logger.info("Usuario con ID {} actualizado exitosamente", id);
             return ResponseEntity.ok(updatedUser);
-
-        } catch (IllegalArgumentException e) {
+        }
+        catch (ValidationException e) {
+            logger.warn("El usuario autenticado no tiene permiso para actualizar el usuario con ID {}", id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar esta cuenta.");
+        }catch (IllegalArgumentException e) {
             logger.warn("Error en los datos del usuario: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -230,7 +231,7 @@ public class UserController {
         try {
             userService.deleteUser(id);
 
-            return ResponseEntity.ok("Usuario con id: "+id+" eliminado con éxito.");
+            return ResponseEntity.ok("Usuario con id: " + id + " eliminado con éxito.");
         } catch (Exception e) {
             logger.error("Error al eliminar el usuario con ID {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar el usuario.");

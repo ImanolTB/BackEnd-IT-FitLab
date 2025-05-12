@@ -33,12 +33,14 @@ public class UserMapper {
     }
     public UpdateUserDTO toUpdateDTO(User user){
         UpdateUserDTO dto= new UpdateUserDTO();
+        dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setUsername(user.getUsername());
         dto.setHeight(user.getHeight());
         dto.setWeight(user.getWeight());
+        dto.setEnabled(user.isEnabled());
         dto.setAge(user.getAge());
         dto.setActivityLevel(user.getActivityLevel());
 

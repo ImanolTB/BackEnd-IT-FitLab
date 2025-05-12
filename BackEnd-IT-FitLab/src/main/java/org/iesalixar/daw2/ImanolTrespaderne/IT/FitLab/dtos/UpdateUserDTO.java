@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateUserDTO {
+    private Long id;
     private String username;
     private String email;
     private String name;
@@ -19,5 +20,6 @@ public class UpdateUserDTO {
     private Integer age;
     private Integer height;
     private BigDecimal weight;
+    private boolean enabled;
     private ActivityLevel activityLevel;
 }

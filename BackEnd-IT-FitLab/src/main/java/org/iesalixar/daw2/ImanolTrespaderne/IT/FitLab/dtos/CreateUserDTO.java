@@ -18,6 +18,7 @@ public class CreateUserDTO {
     private Integer age;
     private Integer height;
     private BigDecimal weight;
+    private boolean enabled;
     private Gender gender;
     private ActivityLevel activityLevel;
 }

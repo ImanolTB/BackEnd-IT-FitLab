@@ -16,6 +16,7 @@ public class CreateUserMapper {
         dto.setName(user.getName());
         dto.setLastName(user.getLastName());
         dto.setAge(user.getAge());
+        dto.setEnabled(user.isEnabled());
         dto.setHeight(user.getHeight());
         dto.setWeight(user.getWeight());
         dto.setGender(user.getGender());
@@ -35,6 +36,7 @@ public class CreateUserMapper {
         user.setAge(dto.getAge());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
+        user.setEnabled(dto.isEnabled());
         user.setGender(dto.getGender());
         user.setActivityLevel(dto.getActivityLevel());
         return user;

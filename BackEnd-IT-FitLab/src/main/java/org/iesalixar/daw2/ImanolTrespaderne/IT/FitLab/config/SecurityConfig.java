@@ -48,12 +48,16 @@ public class SecurityConfig {
                                 "/api/v1/exercises",
                                 "/api/videos/{filename}",
                                 "/api/v1/user/username/{username}",
+                                "/api/v1/user/{id}",
                                 "/api/v1/user/tdee",
                                 "/api/v1/workoutexercises",
                                 "/api/v1/workouts/{id}/workouts",
                                 "/api/v1/workoutexercises/workout/{workoutId}",
                                 "/api/v1/exercises/{id}",
-                                        "/api/v1/reviews").hasAnyRole("USER", "ADMIN")
+                                "/api/v1/reviews").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(
+                                "/api/v1/user/admin/register",
+                                "/api/v1/user").hasRole("ADMIN")
 
                         .requestMatchers("/api/v1/login","/api/v1/user/register","/api/v1/user/reactivate/{email}",
                                 "/api/v1/user/check-username/{username}","/api/v1/user/check-email/{email}","/api/v1/trainingProgrammes/generic").permitAll()

@@ -11,6 +11,7 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.CreateUserMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.UserMapper;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.RoleRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.UserRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,23 +28,27 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private CreateUserMapper createUserMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private RoleRepository roleRepository;
-   @Autowired
-   private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public List<CreateUserDTO> getAllUsers() {
+    public List<UpdateUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(createUserMapper::toDTO)
+                .map(userMapper::toUpdateDTO)
                 .collect(Collectors.toList());
     }
 
     public UpdateUserDTO getUserById(@PathVariable Long id) {
+        String username = jwtUtil.getAuthenticatedUsername();
+        validateUserOwnership(id, username);
         return userRepository.findById(id)
                 .map(userMapper::toUpdateDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -54,6 +59,7 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con username: " + username));
         return userMapper.toDTO(user);
     }
+
     public boolean isUsernameTaken(@PathVariable String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre de usuario no puede estar vacío.");
@@ -69,6 +75,7 @@ public class UserService {
 
         return userRepository.findByEmail(email).isPresent();
     }
+
     public CreateUserDTO createUser(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -89,12 +96,16 @@ public class UserService {
         user.setRoles(Collections.singleton(role));
         return createUserMapper.toDTO(userRepository.save(user));
     }
+
     public UserTDEEDTO getTDEEData(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return userMapper.toTDEEDTO(user);
     }
-    public CreateUserDTO updateUser(@PathVariable Long id, CreateUserDTO dto) {
+
+    public UpdateUserDTO updateUser(@PathVariable Long id, UpdateUserDTO dto) {
+        String username = jwtUtil.getAuthenticatedUsername();
+        validateUserOwnership(id, username);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         user.setName(dto.getName());
@@ -104,8 +115,9 @@ public class UserService {
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
         user.setAge(dto.getAge());
+        user.setEnabled(dto.isEnabled());
         user.setActivityLevel(dto.getActivityLevel());
-        return createUserMapper.toDTO(userRepository.save(user));
+        return userMapper.toUpdateDTO(userRepository.save(user));
     }
 
     public void deleteUser(@PathVariable Long id) {
@@ -123,7 +135,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void reactivateUserByEmail( @PathVariable String email) {
+    public void reactivateUserByEmail(@PathVariable String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
         if (user.isEnabled()) {
