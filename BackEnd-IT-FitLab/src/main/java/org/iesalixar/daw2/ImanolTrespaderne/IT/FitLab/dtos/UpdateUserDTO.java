@@ -19,6 +19,7 @@ public class UpdateUserDTO {
     private String lastName;
     private Integer age;
     private Integer height;
+    private boolean enabled;
     private BigDecimal weight;
     private boolean enabled;
     private ActivityLevel activityLevel;

@@ -1,4 +1,5 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers;
+
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.User;
 
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
@@ -33,7 +34,11 @@ public class CreateUserMapper {
         user.setEmail(dto.getEmail());
         user.setName(dto.getName());
         user.setLastName(dto.getLastName());
-        user.setAge(dto.getAge());
+        if (dto.getAge() < 1) {
+            throw new IllegalArgumentException("La edad debe ser mayor que 0");
+        } else {
+            user.setAge(dto.getAge());
+        }
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
         user.setEnabled(dto.isEnabled());

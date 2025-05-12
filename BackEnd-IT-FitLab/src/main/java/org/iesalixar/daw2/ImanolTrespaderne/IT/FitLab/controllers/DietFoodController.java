@@ -1,5 +1,11 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietFoodDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.MealType;
@@ -15,6 +21,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/dietfood")
+@Tag(name = "DietFood", description = "Gestión de alimentos en dietas por día y tipo de comida")
+
 public class DietFoodController {
 
     private static final Logger logger = LoggerFactory.getLogger(DietFoodController.class);
@@ -26,6 +34,12 @@ public class DietFoodController {
     /**
      * Añadir un alimento a una dieta en un día y comida específicos.
      */
+    @Operation(summary = "Añadir alimento a dieta", description = "Añade un alimento a una dieta para un día y tipo de comida específicos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Alimento añadido con éxito", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DietFoodDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @PostMapping
     public ResponseEntity<?> addFoodToDiet(@RequestBody DietFoodDTO dto) {
         logger.info("Intentando añadir alimento a la dieta: {}", dto);
@@ -40,6 +54,13 @@ public class DietFoodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al añadir alimento.");
         }
     }
+
+    @Operation(summary = "Reemplazar alimentos en una dieta", description = "Reemplaza los alimentos de una dieta en un día y tipo de comida específicos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alimentos reemplazados con éxito", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DietFoodDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Parámetros no coinciden o lista vacía"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @PutMapping("/{dietId}/{dayWeek}/{mealType}")
     public ResponseEntity<?> replaceFoodsForDayAndType(@PathVariable Long dietId,
                                                        @PathVariable DayOfTheWeek dayWeek,
@@ -68,6 +89,12 @@ public class DietFoodController {
     /**
      * Eliminar un alimento de una dieta para un día y tipo de comida específicos.
      */
+    @Operation(summary = "Eliminar alimento de dieta", description = "Elimina un alimento de una dieta específica por día y tipo de comida")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alimento eliminado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @DeleteMapping("/{dietId}/{foodId}")
     public ResponseEntity<?> removeFoodFromDiet(@RequestBody DietFoodDTO dto) {
         logger.info("Intentando eliminar alimento {} de la dieta {} para {} - {}", dto.getFoodId(), dto.getDietId(), dto.getDayWeek(), dto.getMealType());
@@ -86,6 +113,12 @@ public class DietFoodController {
     /**
      * Obtener alimentos de una dieta en un día específico.
      */
+    @Operation(summary = "Obtener alimentos de dieta por día", description = "Devuelve todos los alimentos de una dieta para un día específico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de alimentos obtenida", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DietFoodDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Día de la semana inválido"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @GetMapping("/{dietId}/{dayWeek}")
     public ResponseEntity<?> getFoodsByDayOfTheWeek(@PathVariable Long dietId,
                                                     @PathVariable DayOfTheWeek dayWeek) {

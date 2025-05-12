@@ -1,5 +1,11 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.TrainingProgrammeDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.CreateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UpdateUserDTO;
@@ -18,6 +24,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/trainingProgrammes")
+@Tag(name = "Programas de Entrenamiento", description = "Operaciones relacionadas con programas de entrenamiento")
+
 public class TrainingProgrammeController {
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingProgrammeController.class);
@@ -34,6 +42,11 @@ public class TrainingProgrammeController {
     /**
      * Obtener todos los programas de entrenamiento.
      */
+    @Operation(summary = "Obtener todos los programas de entrenamiento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programas obtenidos correctamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @GetMapping
     public ResponseEntity<?> getAllTrainingProgrammes() {
         logger.info("Solicitud GET: Obtener todos los programas de entrenamiento.");
@@ -49,6 +62,13 @@ public class TrainingProgrammeController {
     /**
      * Obtener una lsita de programas de entrenamiento por ID del usuario.
      */
+    @Operation(summary = "Obtener programas de entrenamiento por ID de usuario")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programas encontrados correctamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron programas"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getTrainingProgrammesByUserId(@PathVariable Long userId) {
         logger.info("Solicitud GET: Obtener programas de entrenamiento del usuario con ID {}", userId);
@@ -79,6 +99,13 @@ public class TrainingProgrammeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
+
+    @Operation(summary = "Obtener programas de entrenamiento genéricos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programas genéricos obtenidos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @GetMapping("/generic")
     public ResponseEntity<?> getGenericTrainingProgrammes() {
         logger.info("Solicitud para listar programas genéricos ordenados por trainingLevel.");
@@ -93,9 +120,16 @@ public class TrainingProgrammeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al obtener los programas genéricos.");
         }
     }
+
     /**
      * Obtener programa de entrenamiento por ID.
      */
+    @Operation(summary = "Obtener programa de entrenamiento por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programa encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No se encontró el programa"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> getTrainingProgrammesById(@PathVariable Long id) {
         logger.info("Solicitud GET: Obtener programa de entrenamiento con ID {}", id);
@@ -123,6 +157,12 @@ public class TrainingProgrammeController {
     /**
      * Crear un nuevo programa de entrenamiento.
      */
+    @Operation(summary = "Crear nuevo programa de entrenamiento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Programa creado exitosamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @PostMapping
     public ResponseEntity<?> createTrainingProgramme(@RequestBody TrainingProgrammeDTO dto) {
         logger.info("Solicitud POST: Crear nuevo programa de entrenamiento.");
@@ -140,6 +180,13 @@ public class TrainingProgrammeController {
     /**
      * Actualizar un programa de entrenamiento existente.
      */
+    @Operation(summary = "Actualizar programa de entrenamiento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programa actualizado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingProgrammeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Programa no encontrado"),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTrainingProgramme(@PathVariable Long id, @RequestBody TrainingProgrammeDTO dto) {
         logger.info("Solicitud PUT: Actualizar programa de entrenamiento con ID {}", id);
@@ -180,6 +227,13 @@ public class TrainingProgrammeController {
     /**
      * Eliminar un programa de entrenamiento por ID.
      */
+    @Operation(summary = "Eliminar programa de entrenamiento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Programa eliminado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Programa no encontrado"),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTrainingProgramme(@PathVariable Long id) {
         logger.info("Solicitud DELETE: Eliminar programa de entrenamiento con ID {}", id);
@@ -201,7 +255,7 @@ public class TrainingProgrammeController {
         } catch (IllegalArgumentException e) {
             logger.warn("Intento de eliminar programa inexistente: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }catch (SecurityException e) {
+        } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error inesperado en DELETE: {}", e.getMessage());

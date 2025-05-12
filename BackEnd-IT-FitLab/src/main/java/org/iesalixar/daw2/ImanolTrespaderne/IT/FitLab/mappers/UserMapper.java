@@ -42,6 +42,7 @@ public class UserMapper {
         dto.setWeight(user.getWeight());
         dto.setEnabled(user.isEnabled());
         dto.setAge(user.getAge());
+        dto.setEnabled(user.isEnabled());
         dto.setActivityLevel(user.getActivityLevel());
 
         return dto;

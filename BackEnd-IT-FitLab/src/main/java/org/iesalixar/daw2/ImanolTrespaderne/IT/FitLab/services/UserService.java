@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private  UserRepository userRepository;
     @Autowired
     private CreateUserMapper createUserMapper;
     @Autowired
@@ -75,7 +75,6 @@ public class UserService {
 
         return userRepository.findByEmail(email).isPresent();
     }
-
     public CreateUserDTO createUser(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -96,7 +95,6 @@ public class UserService {
         user.setRoles(Collections.singleton(role));
         return createUserMapper.toDTO(userRepository.save(user));
     }
-
     public UserTDEEDTO getTDEEData(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -114,6 +112,12 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
+        if (dto.getAge()<1) {
+            throw  new IllegalArgumentException("La edad debe ser mayor de 0");
+        }else{
+            user.setAge(dto.getAge());
+        }
+
         user.setAge(dto.getAge());
         user.setEnabled(dto.isEnabled());
         user.setActivityLevel(dto.getActivityLevel());
@@ -135,7 +139,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void reactivateUserByEmail(@PathVariable String email) {
+    public void reactivateUserByEmail( @PathVariable String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
         if (user.isEnabled()) {
