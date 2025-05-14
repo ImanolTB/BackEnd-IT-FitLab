@@ -41,7 +41,7 @@ public class FileStorageService {
 
 
             // Ruta completa del archivo
-            Path filePath = Paths.get(uploadPath + File.separator + uniqueFilename);
+            Path filePath = Paths.get(uploadPath + File.separator + file.getOriginalFilename());
 
 
             // Crear los directorios si no existen
@@ -53,7 +53,7 @@ public class FileStorageService {
 
 
             logger.info("Archivo {} guardado con éxito.", uniqueFilename);
-            return uniqueFilename; // Devolver el nombre del archivo para guardarlo en la base de datos
+            return file.getOriginalFilename(); // Devolver el nombre del archivo para guardarlo en la base de datos
         } catch (IOException e) {
             logger.error("Error al guardar el archivo: {}", e.getMessage());
             return null;
