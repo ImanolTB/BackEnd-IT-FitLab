@@ -33,7 +33,7 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -46,17 +46,18 @@ public class SecurityConfig {
                                 "/api/v1/trainingProgrammes",
                                 "/api/v1/workouts",
                                 "/api/v1/exercises",
-                                "/api/videos/{filename}",
                                 "/api/v1/user/username/{username}",
                                 "/api/v1/user/tdee",
+                                "/api/v1/videos/{filename}",
                                 "/api/v1/workoutexercises",
+                                "/api/v1/exercises/{id}",
                                 "/api/v1/workouts/{id}/workouts",
                                 "/api/v1/workoutexercises/workout/{workoutId}",
                                 "/api/v1/exercises/{id}",
-                                        "/api/v1/reviews").hasAnyRole("USER", "ADMIN")
+                                "/api/v1/reviews").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/api/v1/login","/api/v1/user/register","/api/v1/user/reactivate/{email}",
-                                "/api/v1/user/check-username/{username}","/api/v1/user/check-email/{email}","/api/v1/trainingProgrammes/generic","/swagger-ui/**", "/swagger-ui.html","/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/login", "/api/v1/user/register", "/api/v1/user/reactivate/{email}",
+                                "/api/v1/user/check-username/{username}", "/api/v1/user/check-email/{email}", "/api/v1/trainingProgrammes/generic", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -64,7 +65,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(){
+    public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(customUserDetailService);
         authProvider.setPasswordEncoder(passwordEncoder());
@@ -72,16 +73,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         logger.info("Entrando en el metodo passwordEncoder");
-        PasswordEncoder encoder= new BCryptPasswordEncoder();
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
         logger.info("Saliendo del metodo passwordEncoder");
         return encoder;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
-return configuration.getAuthenticationManager();
+        return configuration.getAuthenticationManager();
     }
 }

@@ -90,7 +90,7 @@ public class ExerciseController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "500", description = "Error interno")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<?> updateExercise(@PathVariable Long id, @Valid @ModelAttribute ExerciseCreateDTO dto) {
         logger.info("Recibiendo solicitud para actualizar ejercicio con ID: {}", id);
@@ -110,7 +110,7 @@ public class ExerciseController {
             @ApiResponse(responseCode = "400", description = "Ejercicio no encontrado"),
             @ApiResponse(responseCode = "500", description = "Error interno")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExercise(@PathVariable Long id) {
         logger.info("Recibiendo solicitud para eliminar ejercicio con ID: {}", id);

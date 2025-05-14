@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("/api/videos")
+@RequestMapping("/api/v1/videos")
 @Tag(name = "Archivos Multimedia", description = "Operaciones para servir archivos de video")
 
 public class FileStorageController {
