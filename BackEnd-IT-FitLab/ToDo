@@ -1,8 +1,20 @@
 Gestion Admin(REALIZADO)
-Introducir ejercicios admin(DOING)
-Introducir alimentos admin
-probar a introducir videos
+Introducir ejercicios admin(DOING) (REALIZADO)
+Introducir alimentos admin(REALIZADO)
+probar a introducir videos(REALIZADO)
 Hacer responsive parte tabla de ejercicios en WO (REALIZADO)
+Falta boton eliminar sesion de entrenamiento(REALIZADO)
+Confirmar al eliminar entrenamiento(REALIZADO)
+Que empiece en '' los inputs crear workout(REALIZADO)
+Letras editar dieta en blanco(REALIZADO)
+controlar boton EDITAR entrnamiento generico (no se actualiza la pagina al cargar)(REALIZADO)
+
 Vista 404 not found
 Vista 403 forbidden
 Validar todos los formularios en el front (Valoraciones, ediciones y creaciones)
+Buscador de ejercicio y alimento. con SearchTerm (REALIZADO)
+Guard admin
+Añadir en .env la zona horaria
+Letras en blanco en crear entrenamiento modo oscuro
+quitar en user normal el eliminar sesion de entrenamiento
+gestiona el eliminar usuario maquina

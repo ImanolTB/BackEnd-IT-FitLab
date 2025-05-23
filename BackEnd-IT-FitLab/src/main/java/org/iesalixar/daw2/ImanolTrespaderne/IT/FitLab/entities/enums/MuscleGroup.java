@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MuscleGroup {
-    PECTORAL, ESPALDA, HOMBRO, BRAZO, PIERNA, ABDOMEN;
+    PECTORAL, ESPALDA, HOMBRO, TRICEP, BICEP, PIERNA, ABDOMEN;
     // Convierte cualquier string (mayúsculas o minúsculas) en el enum correcto
     @JsonCreator
     public static MuscleGroup fromString(String value) {

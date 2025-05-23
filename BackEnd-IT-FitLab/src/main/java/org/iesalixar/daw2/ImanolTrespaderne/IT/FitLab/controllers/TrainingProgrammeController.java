@@ -202,18 +202,13 @@ public class TrainingProgrammeController {
                 logger.warn("No se encontró el programa de entrenamiento con ID {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el programa de entrenamiento con ID: " + id);
             }
-
-            // Validar que el usuario autenticado es el propietario del programa
-            if (!existingProgramme.get().getUser().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para actualizar el programa con ID {}", id);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar este programa de entrenamiento.");
-            }
-
             // Realizar la actualización
             TrainingProgrammeDTO updatedProgramme = programmeService.updateTrainingProgramme(id, dto);
             logger.info("Programa de entrenamiento con ID {} actualizado exitosamente", id);
             return ResponseEntity.ok(updatedProgramme);
-
+        } catch (SecurityException e) {
+            logger.warn("El usuario autenticado no tiene permiso para actualizar el programa con ID {}", id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar este programa de entrenamiento.");
         } catch (IllegalArgumentException e) {
             logger.warn("Datos inválidos en PUT: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

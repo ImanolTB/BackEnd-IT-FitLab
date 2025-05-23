@@ -123,7 +123,7 @@ INSERT IGNORE INTO diet_food (diet_id, food_id, quantity, day_week, meal_type) V
 -- Insertar programas de entrenamiento
 INSERT IGNORE INTO training_programmes (name, duration_weeks, user_id, is_generic, training_level) VALUES
 ('Fuerza Básica', 6, 1, TRUE, 'PRINCIPIANTE'),
-('Cardio Intermedio', 4, 2, TRUE, 'INTERMEDIO'),
+('Cardio Intermedio', 4, 1, TRUE, 'INTERMEDIO'),
 ('Musculación Avanzada', 8, 3, TRUE, 'AVANZADO'),
 ('HIIT Express', 3, 4, FALSE, 'INTERMEDIO'),
 ('Full Body Fit', 5, 5, FALSE, 'PRINCIPIANTE');
@@ -138,11 +138,11 @@ INSERT IGNORE INTO workouts (name, description, session_Number, training_program
 
 -- Insertar ejercicios
 INSERT IGNORE INTO exercises (name, video_url, muscle_group) VALUES
-('Press banca', 'https://video1.com', 'PECTORAL'),
-('Sentadilla', 'https://video2.com', 'PIERNA'),
-('Dominadas', 'https://video3.com', 'ESPALDA'),
-('Curl bíceps', 'https://video4.com', 'BRAZO'),
-('Press militar', 'https://video5.com', 'HOMBRO');
+('Press banca', 'video1.com', 'PECTORAL'),
+('Sentadilla', 'video2.com', 'PIERNA'),
+('Dominadas', 'video3.com', 'ESPALDA'),
+('Curl bíceps', 'video4.com', 'BICEP'),
+('Press militar', 'video5.com', 'HOMBRO');
 
 -- Insertar workout_exercises
 INSERT IGNORE INTO workout_exercises (workout_id, exercise_id, sets, repetitions, weight) VALUES

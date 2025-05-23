@@ -76,7 +76,6 @@ public class FoodController {
             @ApiResponse(responseCode = "500", description = "Error interno al crear alimento")
     })
     @PostMapping
-
     public ResponseEntity<?> createFood(@RequestBody FoodDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(foodService.createFood(dto));

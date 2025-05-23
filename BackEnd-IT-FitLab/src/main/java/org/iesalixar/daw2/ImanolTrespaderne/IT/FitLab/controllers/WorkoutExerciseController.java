@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutExerciseDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.WorkoutExerciseService;
@@ -72,7 +73,7 @@ public class WorkoutExerciseController {
         try {
             List<WorkoutExerciseDTO> exercises = workoutExerciseService.getExercisesByWorkoutId(workoutId);
             return ResponseEntity.ok(exercises);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             logger.warn("Error al obtener ejercicios para el workout: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
