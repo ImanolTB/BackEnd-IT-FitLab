@@ -3,9 +3,12 @@ package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutExerciseDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Exercise;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Workout;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercise;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercisePK;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.WorkoutExerciseMapper;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.ExerciseRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.WorkoutExerciseRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.WorkoutRepository;
 import org.slf4j.Logger;
@@ -30,6 +33,8 @@ public class WorkoutExerciseService {
     private WorkoutExerciseMapper workoutExerciseMapper;
     @Autowired
     private WorkoutRepository workoutRepository;
+    @Autowired
+    private ExerciseRepository exerciseRepository;
 
     public List<WorkoutExerciseDTO> getAllWorkoutExercises() {
         logger.info("Solicitando todas las relaciones Workout-Exercise.");

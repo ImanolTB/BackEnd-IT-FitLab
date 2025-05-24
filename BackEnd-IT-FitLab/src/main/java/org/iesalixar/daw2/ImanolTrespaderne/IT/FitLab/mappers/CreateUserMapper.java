@@ -33,8 +33,8 @@ public class CreateUserMapper {
         user.setEmail(dto.getEmail());
         user.setName(dto.getName());
         user.setLastName(dto.getLastName());
-        if (dto.getAge() < 1) {
-            throw new IllegalArgumentException("La edad debe ser mayor que 0");
+        if (dto.getAge() < 12) {
+            throw new IllegalArgumentException("La edad debe ser mayor de 12 años");
         } else {
             user.setAge(dto.getAge());
         }

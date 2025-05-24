@@ -74,13 +74,9 @@ public class TrainingProgrammeController {
         logger.info("Solicitud GET: Obtener programas de entrenamiento del usuario con ID {}", userId);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-
+            programmeService.validateOwnership(userId, username);
             // Verificar que el usuario autenticado corresponde con el solicitado
             Optional<UpdateUserDTO> user = Optional.ofNullable(userService.getUserById(userId));
-            if (user.isEmpty() || !user.get().getUsername().equals(username)) {
-                logger.warn("El usuario autenticado no tiene permiso para acceder a estos programas de entrenamiento.");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para acceder a estos programas de entrenamiento.");
-            }
 
             List<TrainingProgrammeDTO> programmes = programmeService.getTrainingProgrammesByUserId(userId);
             if (programmes.isEmpty()) {
@@ -94,6 +90,9 @@ public class TrainingProgrammeController {
         } catch (IllegalArgumentException e) {
             logger.warn("Usuario no encontrado en GET: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (SecurityException e) {
+            logger.warn("El usuario autenticado no tiene permiso para acceder a estos programas de entrenamiento.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error inesperado en GET por usuario: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
@@ -148,6 +147,9 @@ public class TrainingProgrammeController {
         } catch (IllegalArgumentException e) {
             logger.warn("Usuario no encontrado en GET: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (SecurityException e) {
+            logger.warn("El usuario autenticado no tiene permiso para acceder a estos programas de entrenamiento.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error inesperado en GET por usuario: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");

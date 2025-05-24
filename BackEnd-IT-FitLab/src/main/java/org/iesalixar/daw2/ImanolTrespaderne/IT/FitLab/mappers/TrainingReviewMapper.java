@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Component
 public class TrainingReviewMapper {
@@ -49,7 +51,7 @@ public class TrainingReviewMapper {
         review.setId(dto.getId());
         review.setScore(dto.getScore());
         review.setComment(dto.getComment());
-        review.setDate(dto.getDate() != null ? dto.getDate() : LocalDateTime.now());
+        review.setDate(dto.getDate() != null ? dto.getDate() : ZonedDateTime.now(ZoneId.of("Europe/Madrid")));
         return review;
     }
 }

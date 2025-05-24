@@ -1,10 +1,7 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.ActivityLevel;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.Gender;
@@ -27,6 +24,7 @@ public class User {
 
     @NotEmpty(message = "El nombre de usuario no puede estar vacío.")
     @Size(max = 50, message = "El nombre de usuario no puede superar los 50 caracteres.")
+    @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "El nombre de usuario solo puede contener letras, números, puntos y guiones bajos y guiones.")
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
@@ -55,10 +53,12 @@ public class User {
     private Integer age;
 
     @NotNull(message = "La altura es obligatoria.")
+    @Min(100) @Max(250)
     @Column(name = "height", precision = 5, scale = 2, nullable = false)
     private Integer height;
 
     @NotNull(message = "El peso es obligatorio.")
+    @DecimalMin("30.0") @DecimalMax("200.0")
     @Column(name = "weight", precision = 5, scale = 2, nullable = false)
     private BigDecimal weight;
 

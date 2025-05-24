@@ -11,7 +11,7 @@ INSERT IGNORE INTO users (username, password, email, name, last_name, age, heigh
 
 -- Insertar user_roles
 INSERT IGNORE INTO user_roles (user_id, role_id) VALUES
-(1, 1), (2, 2), (3, 2), (4, 2), (5, 1);
+(1, 1), (2, 2), (3, 2), (4, 2), (5, 2);
 
 -- Insertar alimentos
 INSERT IGNORE INTO food (name, calories, proteins, carbohydrates, fats) VALUES
@@ -124,8 +124,8 @@ INSERT IGNORE INTO diet_food (diet_id, food_id, quantity, day_week, meal_type) V
 INSERT IGNORE INTO training_programmes (name, duration_weeks, user_id, is_generic, training_level) VALUES
 ('Fuerza Básica', 6, 1, TRUE, 'PRINCIPIANTE'),
 ('Cardio Intermedio', 4, 1, TRUE, 'INTERMEDIO'),
-('Musculación Avanzada', 8, 3, TRUE, 'AVANZADO'),
-('HIIT Express', 3, 4, FALSE, 'INTERMEDIO'),
+('Musculación Avanzada', 8, 1, TRUE, 'AVANZADO'),
+('HIIT Express', 3, 2, FALSE, 'INTERMEDIO'),
 ('Full Body Fit', 5, 5, FALSE, 'PRINCIPIANTE');
 
 -- Insertar workouts
