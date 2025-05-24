@@ -1,11 +1,16 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutExerciseDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Exercise;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Workout;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercise;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.WorkoutExercisePK;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.mappers.WorkoutExerciseMapper;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.ExerciseRepository;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.WorkoutExerciseRepository;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.repositories.WorkoutRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +31,10 @@ public class WorkoutExerciseService {
     private WorkoutExerciseRepository workoutExerciseRepository;
     @Autowired
     private WorkoutExerciseMapper workoutExerciseMapper;
+    @Autowired
+    private WorkoutRepository workoutRepository;
+    @Autowired
+    private ExerciseRepository exerciseRepository;
 
     public List<WorkoutExerciseDTO> getAllWorkoutExercises() {
         logger.info("Solicitando todas las relaciones Workout-Exercise.");
@@ -34,7 +43,7 @@ public class WorkoutExerciseService {
                 .collect(Collectors.toList());
     }
 
-    public WorkoutExerciseDTO getWorkoutExerciseById(@PathVariable Long workoutId,@PathVariable Long exerciseId) {
+    public WorkoutExerciseDTO getWorkoutExerciseById(@PathVariable Long workoutId, @PathVariable Long exerciseId) {
         logger.info("Buscando relación Workout-Exercise con WorkoutID: {} y ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 
@@ -45,19 +54,21 @@ public class WorkoutExerciseService {
                     return new IllegalArgumentException("Workout-Exercise no encontrado.");
                 });
     }
-    public List<WorkoutExerciseDTO> getExercisesByWorkoutId(Long workoutId) {
-        // Obtener la lista de relaciones para el workout dado
-        List<WorkoutExercise> workoutExercises = workoutExerciseRepository.findByWorkoutId(workoutId);
 
-        if (workoutExercises == null || workoutExercises.isEmpty()) {
-            throw new IllegalArgumentException("No se encontraron ejercicios para el workout con ID: " + workoutId);
+    public List<WorkoutExerciseDTO> getExercisesByWorkoutId(Long workoutId) {
+
+        if (!workoutRepository.existsById(workoutId)) {
+            throw new EntityNotFoundException("Workout con ID " + workoutId + " no existe.");
         }
+
+        List<WorkoutExercise> workoutExercises = workoutExerciseRepository.findByWorkoutId(workoutId);
 
         // Convertir cada entidad a DTO usando el mapper manual
         return workoutExercises.stream()
                 .map(workoutExerciseMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
     @Transactional
     public WorkoutExerciseDTO createWorkoutExercise(@Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Creando nueva relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", dto.getWorkoutId(), dto.getExerciseId());
@@ -73,7 +84,7 @@ public class WorkoutExerciseService {
     }
 
     @Transactional
-    public WorkoutExerciseDTO updateWorkoutExercise(@PathVariable Long workoutId,@PathVariable Long exerciseId,@Valid @RequestBody WorkoutExerciseDTO dto) {
+    public WorkoutExerciseDTO updateWorkoutExercise(@PathVariable Long workoutId, @PathVariable Long exerciseId, @Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Actualizando relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 
@@ -97,7 +108,7 @@ public class WorkoutExerciseService {
     }
 
     @Transactional
-    public void deleteWorkoutExercise(@PathVariable Long workoutId,@PathVariable Long exerciseId) {
+    public void deleteWorkoutExercise(@PathVariable Long workoutId, @PathVariable Long exerciseId) {
         logger.info("Intentando eliminar relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 

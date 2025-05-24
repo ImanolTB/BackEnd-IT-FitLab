@@ -1,11 +1,15 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "training_reviews")
@@ -29,9 +33,10 @@ public class TrainingReview {
     @Column(nullable = false)
     private Integer score;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = true,length = 100)
+
     private String comment;
 
-    @Column(name = "date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime date = LocalDateTime.now();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Europe/Madrid")
+    private ZonedDateTime date;
 }

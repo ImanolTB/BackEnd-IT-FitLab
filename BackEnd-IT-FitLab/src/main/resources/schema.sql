@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS training_programmes (
   user_id BIGINT,
   is_generic BOOLEAN DEFAULT FALSE,
   training_level ENUM('PRINCIPIANTE', 'INTERMEDIO', 'AVANZADO'),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
   UNIQUE (name, user_id, duration_weeks, training_level)
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL UNIQUE,
   video_url VARCHAR(255),
-  muscle_group ENUM('PECTORAL', 'ESPALDA', 'HOMBRO', 'BRAZO', 'PIERNA')
+  muscle_group ENUM('PECTORAL', 'ESPALDA', 'HOMBRO', 'BICEP','TRICEP', 'PIERNA')
 );
 
 -- 10. Tabla workout_exercises
@@ -114,6 +114,6 @@ CREATE TABLE IF NOT EXISTS training_reviews (
   score INTEGER,
   comment VARCHAR(255),
   date TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (training_programme_id) REFERENCES training_programmes(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (training_programme_id) REFERENCES training_programmes(id) ON DELETE CASCADE ON UPDATE CASCADE
 );

@@ -1,5 +1,6 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.WorkoutDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.TrainingProgramme;
@@ -49,12 +50,11 @@ public class WorkoutService {
                 });
     }
     public List<WorkoutDTO> getWorkoutsByTrainingProgrammeID(Long trainingProgrammeId) {
-        List<Workout> workouts = workoutRepository.findByTrainingProgrammeId(trainingProgrammeId);
 
-        // Lanzar excepción si no se encuentran sesiones (puedes optar por retornar lista vacía si la lógica así lo indica)
-        if (workouts == null || workouts.isEmpty()) {
-            throw new IllegalArgumentException("No se encontraron sesiones para el training programme con ID: " + trainingProgrammeId);
+        if (!trainingProgrammeRepository.existsById(trainingProgrammeId)) {
+            throw new EntityNotFoundException("TrainingProgramme con ID " + trainingProgrammeId + " no existe.");
         }
+        List<Workout> workouts = workoutRepository.findByTrainingProgrammeId(trainingProgrammeId);
 
         // Convertir cada entidad Workout a WorkoutDTO usando el mapper manual
         return workouts.stream()

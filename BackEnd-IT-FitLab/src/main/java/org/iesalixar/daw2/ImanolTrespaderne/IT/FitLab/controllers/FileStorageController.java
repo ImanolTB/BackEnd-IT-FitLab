@@ -1,6 +1,11 @@
 package org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.controllers;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.Exercise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,27 +26,36 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("/api/videos")
+@RequestMapping("/api/v1/videos")
+@Tag(name = "Archivos Multimedia", description = "Operaciones para servir archivos de video")
+
 public class FileStorageController {
     private static final Logger logger = LoggerFactory.getLogger(Exercise.class);
     @Value("${UPLOAD_PATH}")
     private String uploadPath;
 
-    @GetMapping ("/{filename}")
-    public ResponseEntity<?> getVideo(@PathVariable String filename){
+    @Operation(summary = "Obtener video por nombre de archivo", description = "Sirve archivos de video desde el sistema de almacenamiento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Video servido exitosamente",
+                    content = @Content(mediaType = "application/octet-stream")),
+            @ApiResponse(responseCode = "404", description = "Archivo no encontrado o no legible"),
+            @ApiResponse(responseCode = "500", description = "Error interno al servir el archivo")
+    })
+    @GetMapping("/{filename}")
+    public ResponseEntity<?> getVideo(@PathVariable String filename) {
         try {
             //Construir la ruta completa del archivo a partir del directorio de lmacenamiento y el nombre del archivo.
-            Path filePath= Paths.get(uploadPath).resolve(filename).normalize();
+            Path filePath = Paths.get(uploadPath).resolve(filename).normalize();
             //Crear un recurso a partir de la URI  del archivo.
-            Resource resource= new UrlResource(filePath.toUri());
+            Resource resource = new UrlResource(filePath.toUri());
 
-            if(resource.exists() && resource.isReadable()){
+            if (resource.exists() && resource.isReadable()) {
                 logger.info("Sirviendo archivo : {}", filename);
                 //intenta detectar el tipo MIME del archivo.
-                String contenType= Files.probeContentType(filePath);
-                if(contenType == null){
+                String contenType = Files.probeContentType(filePath);
+                if (contenType == null) {
                     //Si no se puede determinar el tipo de MIME, se asigna un tipo genérico.
-                    contenType= "application/octet-stream";
+                    contenType = "application/octet-stream";
                     logger.warn("No se pudo detectar el MIME del archivo {}. Se usará el tipo genérico", filename);
                 }
                 //Devolver el archivo con el MIME y configuración adecuada para mostrarlo en linea.
@@ -52,10 +66,10 @@ public class FileStorageController {
             } else {
                 //si el archivo no existe o no es accesible, devolver un error 404 (not found)
                 logger.error("El archivo {} no existe o no se puede leer", filename);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El archivo "+filename+" no existe o no se puede leer");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El archivo " + filename + " no existe o no se puede leer");
             }
         } catch (IOException e) {
-            logger.error("Error al servir el archivo {} : {}",filename, e.getMessage());
+            logger.error("Error al servir el archivo {} : {}", filename, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
