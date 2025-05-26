@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 "/api/v1/food",
                                 "/api/v1/dietfood/**",
                                 "/api/v1/trainingProgrammes",
+                                "/api/v1/trainingProgrammes/user/{userId}",
                                 "/api/v1/workouts",
                                 "/api/v1/exercises",
                                 "/api/v1/user/username/{username}",

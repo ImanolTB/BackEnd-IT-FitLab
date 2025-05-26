@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,9 +75,12 @@ public class TrainingProgrammeController {
         logger.info("Solicitud GET: Obtener programas de entrenamiento del usuario con ID {}", userId);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            programmeService.validateOwnership(userId, username);
+            UpdateUserDTO user = userService.getUserById(userId);
+
+            if (!programmeService.isAdmin(username) && !user.getUsername().equals(username)) {
+                throw new SecurityException("No autorizado");
+            }
             // Verificar que el usuario autenticado corresponde con el solicitado
-            Optional<UpdateUserDTO> user = Optional.ofNullable(userService.getUserById(userId));
 
             List<TrainingProgrammeDTO> programmes = programmeService.getTrainingProgrammesByUserId(userId);
             if (programmes.isEmpty()) {
@@ -87,9 +91,9 @@ public class TrainingProgrammeController {
             logger.info("Programas de entrenamiento encontrados para el usuario con ID {}: {}", userId, programmes);
             return ResponseEntity.ok(programmes);
 
-        } catch (IllegalArgumentException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("Usuario no encontrado en GET: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (SecurityException e) {
             logger.warn("El usuario autenticado no tiene permiso para acceder a estos programas de entrenamiento.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());

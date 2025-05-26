@@ -11,10 +11,12 @@ import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -81,18 +83,15 @@ public class TrainingProgrammeService {
         logger.info("Buscando programas de entrenamiento para el usuario con ID: {}", userId);
         if (!userRepository.existsById(userId)) {
             logger.warn("Usuario con ID {} no encontrado.", userId);
-            throw new IllegalArgumentException("Usuario no encontrado.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado.");
         }
-        try {
+
             List<TrainingProgrammeDTO> programmes = programmeRepository.findByUserId(userId)
                     .stream()
                     .map(programmeMapper::toDTO)
                     .collect(Collectors.toList());
             return programmes;
-        } catch (Exception e) {
-            logger.error("Error al obtener programas de entrenamiento del usuario con ID {}: {}", userId, e.getMessage());
-            throw new RuntimeException("Error interno al obtener programas de entrenamiento del usuario.");
-        }
+
     }
 
 
