@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL UNIQUE,
   video_url VARCHAR(255),
-  muscle_group ENUM('PECTORAL', 'ESPALDA', 'HOMBRO', 'BICEP','TRICEP', 'PIERNA')
+  muscle_group ENUM('PECTORAL', 'ESPALDA', 'HOMBRO', 'BICEP','TRICEP', 'PIERNA', 'ABDOMEN')
 );
 
 -- 10. Tabla workout_exercises
