@@ -154,4 +154,11 @@ public class UserService {
                         .anyMatch(role -> role.getName().equals("ROLE_ADMIN")))
                 .orElse(false);
     }
+
+    public UpdateUserDTO getUserByEmail(String email){
+        return userRepository.findByEmail(email)
+                .map(userMapper::toUpdateDTO)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+    }
 }

@@ -103,6 +103,7 @@ public class TrainingReviewService {
 
         review.setScore(dto.getScore());
         review.setComment(dto.getComment());
+        review.setDate(dto.getDate());
 
         return reviewMapper.toDTO(reviewRepository.save(review));
     }
@@ -114,39 +115,13 @@ public class TrainingReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    public void validateReviewAccess( Long userId, Long programmeId, String username) {
+    public void validateReviewAccess( Long reviewId, String username) {
         if (isAdmin(username)) return; // acceso total para admins
 
-        TrainingProgramme programme = programmeRepository.findById(programmeId)
-                .orElseThrow(() -> new IllegalArgumentException("Programa de entrenamiento no encontrado"));
-
-        if (!programme.getIsGeneric()) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
-            if (!user.getUsername().equals(username)) {
-                throw new SecurityException("No tienes permiso para acceder a esta reseña.");
-            }
-        }
-    }
-    public void validateUserAccess(Long requestedUserId, String username) {
-        if (isAdmin(username)) return;
-
-        User requestedUser = userRepository.findById(requestedUserId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
-        // Si el usuario autenticado está intentando acceder a otro usuario:
-        if (!requestedUser.getUsername().equals(username)) {
-            // Verificar que no existan reviews asociadas a programas NO genéricos
-            List<TrainingReview> reviews = reviewRepository.findByUserId(requestedUserId);
-
-            boolean hayReviewsPrivadas = reviews.stream()
-                    .map(TrainingReview::getTrainingProgramme)
-                    .anyMatch(programme -> !programme.getIsGeneric());
-
-            if (hayReviewsPrivadas) {
-                throw new SecurityException("No tienes permiso para acceder a estas reseñas privadas.");
-            }
+        TrainingReview review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Reseña no encontrada"));
+        if (!review.getUser().getUsername().equals(username) && !isAdmin(username)) {
+            throw new SecurityException("No tienes permiso para realizar esta acción.");
         }
     }
     public boolean isAdmin(String username) {

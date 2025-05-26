@@ -58,22 +58,7 @@ public class TrainingReviewController {
         }
     }
 
-    @Operation(summary = "Obtener reseñas por usuario")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de reseñas del usuario", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingReviewDTO.class))), @ApiResponse(responseCode = "403", description = "No tienes permisos"), @ApiResponse(responseCode = "500", description = "Error interno")})
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getReviewsByUser(@PathVariable Long userId) {
-        logger.info("Solicitud para obtener reseñas del usuario ID: {}", userId);
-        try {
-            String username = jwtUtil.getAuthenticatedUsername();
-            reviewService.validateUserAccess(userId, username);
-            return ResponseEntity.ok(reviewService.getReviewsByUser(userId));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error al obtener reseñas del usuario {}: {}", userId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al obtener las reseñas del usuario.");
-        }
-    }
+
 
     @Operation(summary = "Crear una nueva reseña")
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Reseña creada con éxito", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingReviewDTO.class))), @ApiResponse(responseCode = "400", description = "Datos inválidos"), @ApiResponse(responseCode = "500", description = "Error interno")})
@@ -99,6 +84,7 @@ public class TrainingReviewController {
         logger.info("Solicitud para actualizar reseña ");
         try {
             String username = jwtUtil.getAuthenticatedUsername();
+            reviewService.validateReviewAccess(dto.getUser().getId(), username);
             return ResponseEntity.ok(reviewService.updateReview(reviewId, dto));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -117,11 +103,7 @@ public class TrainingReviewController {
         logger.info("Solicitud para eliminar reseña con id: {}", reviewId);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            // Obtenemos la reseña completa para formar el usuario asociado
-            TrainingReviewDTO dto = reviewService.getReview(reviewId);
-            // Validamos que el username del token coincida con el del usuario de la reseña
-
-
+            reviewService.validateReviewAccess(reviewId, username);
             // Si la validación pasa, se procede a eliminar la reseña
             reviewService.deleteReview(reviewId);
             return ResponseEntity.ok("Reseña eliminada con éxito.");
