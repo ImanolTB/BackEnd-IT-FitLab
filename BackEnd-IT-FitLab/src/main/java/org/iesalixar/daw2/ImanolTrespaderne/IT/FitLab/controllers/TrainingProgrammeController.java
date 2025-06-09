@@ -240,8 +240,10 @@ public class TrainingProgrammeController {
         logger.info("Solicitud DELETE: Eliminar programa de entrenamiento con ID {}", id);
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            programmeService.validateOwnership(id, username);
-
+            TrainingProgrammeDTO programme = programmeService.getTrainingProgrammeById(id);
+            if (!programmeService.isAdmin(username) && !programme.getUser().getUsername().equals(username)) {
+                throw new SecurityException("No autorizado");
+            }
             // Obtener el programa de entrenamiento
             Optional<TrainingProgrammeDTO> existingProgramme = Optional.ofNullable(programmeService.getTrainingProgrammeById(id));
             if (existingProgramme.isEmpty()) {
