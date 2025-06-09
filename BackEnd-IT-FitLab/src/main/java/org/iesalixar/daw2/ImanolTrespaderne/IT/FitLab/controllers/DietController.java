@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.DietDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.FoodDTO;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.dtos.UpdateUserDTO;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.entities.enums.DayOfTheWeek;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.DietService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.FoodService;
+import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.services.UserService;
 import org.iesalixar.daw2.ImanolTrespaderne.IT.FitLab.utils.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,7 +201,10 @@ public class DietController {
     public ResponseEntity<?> deleteDiet(@PathVariable Long id) {
         try {
             String username = jwtUtil.getAuthenticatedUsername();
-            dietService.validateOwnership(id, username);
+            DietDTO diet = dietService.getDietById(id);
+            if (!dietService.isAdmin(username) && !diet.getUser().getUsername().equals(username)) {
+                throw new SecurityException("No autorizado");
+            }
             dietService.deleteDiet(id);
             return ResponseEntity.ok("Dieta con ID " + id + " eliminada con éxito.");
         } catch (IllegalArgumentException e) {
