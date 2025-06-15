@@ -19,8 +19,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class DietService {
-    private static final Logger logger = LoggerFactory.getLogger(DietService.class);
 
+    // Logger para registrar información de depuración o errores
+    private static final Logger logger = LoggerFactory.getLogger(DietService.class);
 
     @Autowired
     private DietRepository dietRepository;
@@ -30,10 +31,14 @@ public class DietService {
 
     @Autowired
     private DietMapper dietMapper;
+
     @Autowired
     private CustomUserDetailService userDetailService;
 
-    public List <DietDTO> getAllDiets() {
+    /**
+     * Devuelve todas las dietas existentes en la base de datos como una lista de DTOs.
+     */
+    public List<DietDTO> getAllDiets() {
         try {
             return dietRepository.findAll().stream()
                     .map(dietMapper::toDTO)
@@ -43,12 +48,20 @@ public class DietService {
         }
     }
 
+    /**
+     * Devuelve una dieta específica a partir de su ID.
+     * Lanza una excepción si no se encuentra.
+     */
     public DietDTO getDietById(@PathVariable Long id) {
         return dietRepository.findById(id)
                 .map(dietMapper::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
     }
 
+    /**
+     * Devuelve todas las dietas asociadas a un usuario dado por su nombre de usuario.
+     * Si no se encuentra ninguna dieta, lanza una excepción.
+     */
     public List<DietDTO> getDietByUsername(@PathVariable String username) {
         try {
             List<Diet> diets = dietRepository.findByUserUsername(username);
@@ -56,8 +69,8 @@ public class DietService {
             if (diets.isEmpty()) {
                 throw new IllegalArgumentException("No se encontraron dietas para el usuario: " + username);
             }
-            return dietRepository.findByUserUsername(username)
-                    .stream()
+
+            return diets.stream()
                     .map(dietMapper::toDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -65,6 +78,10 @@ public class DietService {
         }
     }
 
+    /**
+     * Crea una nueva dieta a partir de un DTO.
+     * Convierte el DTO a entidad, lo guarda y devuelve el DTO resultante.
+     */
     public DietDTO createDiet(@Valid @RequestBody DietDTO dto) {
         try {
             Diet diet = dietMapper.toEntity(dto);
@@ -74,20 +91,29 @@ public class DietService {
         }
     }
 
-    public DietDTO updateDiet(@PathVariable Long id,@Valid @RequestBody DietDTO dto) {
+    /**
+     * Actualiza una dieta existente con los datos del DTO recibido.
+     * Solo se actualizan los campos permitidos (nombre, descripción, duración y objetivo).
+     */
+    public DietDTO updateDiet(@PathVariable Long id, @Valid @RequestBody DietDTO dto) {
         try {
             Diet diet = dietRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
+
             diet.setDescription(dto.getDescription());
             diet.setName(dto.getName());
             diet.setDurationWeeks(dto.getDurationWeeks());
             diet.setGoal(dto.getGoal());
+
             return dietMapper.toDTO(dietRepository.save(diet));
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar la dieta.");
         }
     }
 
+    /**
+     * Elimina una dieta por su ID.
+     */
     public void deleteDiet(@PathVariable Long id) {
         try {
             dietRepository.deleteById(id);
@@ -96,16 +122,24 @@ public class DietService {
         }
     }
 
+    /**
+     * Valida si el usuario tiene permiso para modificar la dieta indicada.
+     * Si es administrador, se permite automáticamente. En caso contrario, se comprueba la propiedad.
+     */
     public void validateOwnership(Long dietId, String username) {
         if (isAdmin(username)) return;
+
         Diet diet = dietRepository.findById(dietId)
                 .orElseThrow(() -> new IllegalArgumentException("Dieta no encontrada"));
 
-        if (!diet.getUser().getUsername().equals(username) && !isAdmin(username)) {
+        if (!diet.getUser().getUsername().equals(username)) {
             throw new SecurityException("No tienes permiso para modificar esta dieta.");
         }
     }
 
+    /**
+     * Verifica si el usuario tiene rol de administrador.
+     */
     public boolean isAdmin(String username) {
         return userRepository.findByUsername(username)
                 .map(user -> user.getRoles().stream()

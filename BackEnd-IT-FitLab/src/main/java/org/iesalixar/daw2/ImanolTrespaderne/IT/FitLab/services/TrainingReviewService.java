@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class TrainingReviewService {
+
+    // Logger para registrar eventos e incidencias
     private static final Logger logger = LoggerFactory.getLogger(TrainingReview.class);
 
     @Autowired
@@ -32,6 +34,7 @@ public class TrainingReviewService {
 
     @Autowired
     private TrainingProgrammeMapper trainingProgrammeMapper;
+
     @Autowired
     private TrainingReviewRepository reviewRepository;
 
@@ -43,8 +46,13 @@ public class TrainingReviewService {
 
     @Autowired
     private TrainingProgrammeRepository programmeRepository;
+
     @Autowired
     private JwtUtil jwtUtil;
+
+    /**
+     * Devuelve todas las reseñas almacenadas en la base de datos.
+     */
     public List<TrainingReviewDTO> getAllReviews() {
         return reviewRepository.findAll()
                 .stream()
@@ -52,12 +60,19 @@ public class TrainingReviewService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Devuelve una reseña específica por su ID.
+     * Lanza excepción si no existe.
+     */
     public TrainingReviewDTO getReview(@PathVariable Long reviewId) {
         return reviewRepository.findById(reviewId)
                 .map(reviewMapper::toDTO)
                 .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
     }
 
+    /**
+     * Devuelve todas las reseñas realizadas por un usuario concreto.
+     */
     public List<TrainingReviewDTO> getReviewsByUser(@PathVariable Long userId) {
         return reviewRepository.findByUserId(userId)
                 .stream()
@@ -65,6 +80,9 @@ public class TrainingReviewService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Devuelve todas las reseñas asociadas a un programa de entrenamiento concreto.
+     */
     public List<TrainingReviewDTO> getReviewsByTrainingProgramme(@PathVariable Long programmeId) {
         return reviewRepository.findByTrainingProgrammeId(programmeId)
                 .stream()
@@ -72,32 +90,36 @@ public class TrainingReviewService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Crea una nueva reseña asociándola automáticamente al usuario autenticado.
+     * Utiliza el token JWT para obtener el usuario.
+     */
     public TrainingReviewDTO createReview(TrainingReviewDTO dto) {
-        // 1. Obtener username del token
+        // Obtener nombre de usuario autenticado a través del token
         String username = jwtUtil.getAuthenticatedUsername();
         if (username == null) {
             throw new SecurityException("Usuario no autenticado.");
         }
 
-        // 2. Buscar el usuario real en la BD
+        // Buscar usuario por username
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));
 
-        // 3. Convertir el DTO a entidad
+        // Convertir DTO a entidad y asignar el usuario
         TrainingReview review = reviewMapper.toEntity(dto);
-
-        // 4. Asignar el usuario a la entidad
         review.setUser(user);
 
-        // 5. Guardar la reseña
+        // Guardar reseña en la base de datos
         TrainingReview saved = reviewRepository.save(review);
 
-        // 6. Devolver la reseña convertida a DTO
+        // Devolver la reseña guardada en formato DTO
         return reviewMapper.toDTO(saved);
     }
-    public TrainingReviewDTO updateReview(@PathVariable Long reviewId,@Valid @RequestBody TrainingReviewDTO dto) {
 
-
+    /**
+     * Actualiza una reseña existente con los nuevos valores proporcionados en el DTO.
+     */
+    public TrainingReviewDTO updateReview(@PathVariable Long reviewId, @Valid @RequestBody TrainingReviewDTO dto) {
         TrainingReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Reseña no encontrada"));
 
@@ -108,6 +130,9 @@ public class TrainingReviewService {
         return reviewMapper.toDTO(reviewRepository.save(review));
     }
 
+    /**
+     * Elimina una reseña por su ID si existe.
+     */
     public void deleteReview(@PathVariable Long reviewId) {
         if (!reviewRepository.existsById(reviewId)) {
             throw new IllegalArgumentException("Reseña no encontrada");
@@ -115,15 +140,24 @@ public class TrainingReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    public void validateReviewAccess( Long reviewId, String username) {
-        if (isAdmin(username)) return; // acceso total para admins
+    /**
+     * Valida que el usuario tenga permiso para acceder o modificar una reseña.
+     * El propietario de la reseña o un administrador pueden hacerlo.
+     */
+    public void validateReviewAccess(Long reviewId, String username) {
+        if (isAdmin(username)) return;
 
         TrainingReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Reseña no encontrada"));
+
         if (!review.getUser().getUsername().equals(username) && !isAdmin(username)) {
             throw new SecurityException("No tienes permiso para realizar esta acción.");
         }
     }
+
+    /**
+     * Verifica si un usuario tiene rol de administrador.
+     */
     public boolean isAdmin(String username) {
         return userRepository.findByUsername(username)
                 .map(user -> user.getRoles().stream()

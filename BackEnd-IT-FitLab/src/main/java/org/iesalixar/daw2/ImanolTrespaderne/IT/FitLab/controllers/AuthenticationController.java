@@ -50,40 +50,59 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor",
                     content = @Content(mediaType = "application/json"))
     })
+    /*
+    * Método que se encargará de realizar el login de la aplicación
+    */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> authenticate(@Valid @RequestBody AuthRequestDTO authRequest){
-      try {
-          Optional<User> user=userRepository.findByUsername(authRequest.getUsername());
-          if (authRequest.getUsername() == null || authRequest.getPassword() == null){
-              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponseDTO(null, "El nombre de usuario y la contraseña son obligatorios"));
-          }
-          if (!user.get().isEnabled()) {
-              throw new DisabledException("La cuenta está desactivada");
-          }
-          Authentication authentication =authenticationManager.authenticate(
-                  new UsernamePasswordAuthenticationToken(authRequest.getUsername(),authRequest.getPassword())
-          );
+    public ResponseEntity<AuthResponseDTO> authenticate(@Valid @RequestBody AuthRequestDTO authRequest) {
+        try {
+            // Se busca el usuario en la base de datos por su nombre de usuario
+            Optional<User> user = userRepository.findByUsername(authRequest.getUsername());
 
-          String username= authentication.getName();
-          List<String> roles= authentication.getAuthorities().stream()
-                  .map(authority ->authority.getAuthority())
-                  .toList();
+            // Verificación básica de campos obligatorios
+            if (authRequest.getUsername() == null || authRequest.getPassword() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new AuthResponseDTO(null, "El nombre de usuario y la contraseña son obligatorios"));
+            }
 
-          String token =jwtUtil.generateToken(username, roles);
+            // Si el usuario existe pero está deshabilitado, se lanza una excepción
+            if (user.isPresent() && !user.get().isEnabled()) {
+                throw new DisabledException("La cuenta está desactivada");
+            }
 
-          return ResponseEntity.ok(new AuthResponseDTO(token,"Login exitoso"));
-      }catch (BadCredentialsException e){
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                  .body(new AuthResponseDTO(null, "Credenciales inválidas. Por favor, verifica tus datos"));
-      }catch (DisabledException e){
-          return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                  .body(new AuthResponseDTO(null, "El usuario está actualmente deshabilitado")) ;
-      }
-      catch (Exception e){
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                  .body(new AuthResponseDTO(null, "Ocurrió un error inesperado. Intentelo de nuevo más tarde.")) ;
-      }
+            // Se intenta autenticar con el AuthenticationManager de Spring
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getUsername(),
+                            authRequest.getPassword()
+                    )
+            );
+
+            // Si la autenticación es correcta, se recupera el nombre de usuario y roles
+            String username = authentication.getName();
+            List<String> roles = authentication.getAuthorities().stream()
+                    .map(authority -> authority.getAuthority())
+                    .toList();
+
+            // Se genera un token JWT con el nombre de usuario y los roles
+            String token = jwtUtil.generateToken(username, roles);
+
+            // Se devuelve una respuesta con el token y un mensaje de éxito
+            return ResponseEntity.ok(new AuthResponseDTO(token, "Login exitoso"));
+
+        } catch (BadCredentialsException e) {
+            // En caso de credenciales inválidas
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponseDTO(null, "Credenciales inválidas. Por favor, verifica tus datos"));
+        } catch (DisabledException e) {
+            // En caso de cuenta deshabilitada
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new AuthResponseDTO(null, "El usuario está actualmente deshabilitado"));
+        } catch (Exception e) {
+            // Para cualquier otro error inesperado
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthResponseDTO(null, "Ocurrió un error inesperado. Inténtelo de nuevo más tarde."));
+        }
     }
-
 
 }

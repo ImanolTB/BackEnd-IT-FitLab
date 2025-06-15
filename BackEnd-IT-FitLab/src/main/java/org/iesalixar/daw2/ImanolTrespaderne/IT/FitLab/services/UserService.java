@@ -27,85 +27,125 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
+
     @Autowired
     private CreateUserMapper createUserMapper;
+
     @Autowired
     private UserMapper userMapper;
+
     @Autowired
     private RoleRepository roleRepository;
-   @Autowired
-   private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    /**
+     * Devuelve todos los usuarios en forma de lista de DTOs para edición.
+     */
     public List<UpdateUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::toUpdateDTO)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Devuelve un usuario por su ID en formato de DTO para edición.
+     */
     public UpdateUserDTO getUserById(@PathVariable Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toUpdateDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 
+    /**
+     * Devuelve un usuario completo a partir de su nombre de usuario.
+     */
     public UserDTO getUserByUsername(@PathVariable String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con username: " + username));
         return userMapper.toDTO(user);
     }
+
+    /**
+     * Comprueba si un nombre de usuario ya está registrado.
+     */
     public boolean isUsernameTaken(@PathVariable String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre de usuario no puede estar vacío.");
         }
-
         return userRepository.findByUsername(username).isPresent();
     }
 
+    /**
+     * Comprueba si un email ya está registrado.
+     */
     public boolean isEmailTaken(@PathVariable String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("El email no puede estar vacío.");
         }
-
         return userRepository.findByEmail(email).isPresent();
     }
+
+    /**
+     * Crea un nuevo usuario con rol estándar.
+     * Encripta la contraseña y activa la cuenta por defecto.
+     */
     public CreateUserDTO createUser(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
+
         Role role = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("El rol USER no fue encontrado"));
+
         user.setRoles(Collections.singleton(role));
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
-
+    /**
+     * Crea un nuevo usuario con rol de administrador.
+     */
     public CreateUserDTO createAdmin(@Valid @RequestBody CreateUserDTO dto) {
         User user = createUserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
+
         Role role = roleRepository.findByName("ROLE_ADMIN")
                 .orElseThrow(() -> new RuntimeException("El rol ADMIN no fue encontrado"));
+
         user.setRoles(Collections.singleton(role));
         return createUserMapper.toDTO(userRepository.save(user));
     }
+
+    /**
+     * Devuelve un DTO con los datos necesarios para calcular el TDEE (gasto energético diario).
+     */
     public UserTDEEDTO getTDEEData(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return userMapper.toTDEEDTO(user);
     }
+
+    /**
+     * Actualiza los datos de un usuario a partir del ID y nuevo DTO recibido.
+     * Valida edad positiva.
+     */
     public CreateUserDTO updateUser(@PathVariable Long id, CreateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
         user.setName(dto.getName());
         user.setLastName(dto.getLastName());
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());
-        if (dto.getAge()<1) {
-            throw  new IllegalArgumentException("La edad debe ser mayor de 0");
-        }else{
+
+        if (dto.getAge() < 1) {
+            throw new IllegalArgumentException("La edad debe ser mayor de 0");
+        } else {
             user.setAge(dto.getAge());
         }
 
@@ -113,6 +153,9 @@ public class UserService {
         return createUserMapper.toDTO(userRepository.save(user));
     }
 
+    /**
+     * Elimina un usuario por su ID.
+     */
     public void deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("Usuario no encontrado");
@@ -120,7 +163,9 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-
+    /**
+     * Desactiva la cuenta de un usuario (no se elimina).
+     */
     public void deactivateUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -128,26 +173,38 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void reactivateUserByEmail( @PathVariable String email) {
+    /**
+     * Reactiva una cuenta desactivada, a partir del email del usuario.
+     */
+    public void reactivateUserByEmail(@PathVariable String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ese email"));
+
         if (user.isEnabled()) {
             throw new IllegalStateException("La cuenta ya está activa.");
         }
+
         user.setEnabled(true);
         userRepository.save(user);
     }
 
+    /**
+     * Valida si un usuario tiene permiso para modificar su propia cuenta o si es admin.
+     */
     public void validateUserOwnership(Long userId, String username) {
         if (isAdmin(username)) return;
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
         if (!user.getUsername().equals(username) && !isAdmin(username)) {
             throw new SecurityException("No tienes permiso para realizar esta acción.");
         }
     }
 
+    /**
+     * Verifica si un usuario es administrador.
+     */
     public boolean isAdmin(String username) {
         return userRepository.findByUsername(username)
                 .map(user -> user.getRoles().stream()
@@ -155,10 +212,12 @@ public class UserService {
                 .orElse(false);
     }
 
-    public UpdateUserDTO getUserByEmail(String email){
+    /**
+     * Devuelve los datos de un usuario a partir de su email.
+     */
+    public UpdateUserDTO getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(userMapper::toUpdateDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
     }
 }

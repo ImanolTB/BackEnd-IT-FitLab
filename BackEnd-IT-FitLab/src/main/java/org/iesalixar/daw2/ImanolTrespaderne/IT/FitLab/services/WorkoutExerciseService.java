@@ -25,17 +25,24 @@ import java.util.stream.Collectors;
 @Service
 public class WorkoutExerciseService {
 
+    // Logger para registrar eventos y errores relevantes
     private static final Logger logger = LoggerFactory.getLogger(WorkoutExerciseService.class);
 
     @Autowired
     private WorkoutExerciseRepository workoutExerciseRepository;
+
     @Autowired
     private WorkoutExerciseMapper workoutExerciseMapper;
+
     @Autowired
     private WorkoutRepository workoutRepository;
+
     @Autowired
     private ExerciseRepository exerciseRepository;
 
+    /**
+     * Devuelve todas las relaciones entre entrenamientos y ejercicios.
+     */
     public List<WorkoutExerciseDTO> getAllWorkoutExercises() {
         logger.info("Solicitando todas las relaciones Workout-Exercise.");
         return workoutExerciseRepository.findAll().stream()
@@ -43,6 +50,10 @@ public class WorkoutExerciseService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Devuelve una relación específica entre un entrenamiento y un ejercicio,
+     * utilizando como identificador compuesto el ID del entrenamiento y del ejercicio.
+     */
     public WorkoutExerciseDTO getWorkoutExerciseById(@PathVariable Long workoutId, @PathVariable Long exerciseId) {
         logger.info("Buscando relación Workout-Exercise con WorkoutID: {} y ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
@@ -55,20 +66,26 @@ public class WorkoutExerciseService {
                 });
     }
 
+    /**
+     * Devuelve todas las relaciones de ejercicios pertenecientes a un entrenamiento concreto.
+     * Si no existe el entrenamiento, lanza una excepción.
+     */
     public List<WorkoutExerciseDTO> getExercisesByWorkoutId(Long workoutId) {
-
         if (!workoutRepository.existsById(workoutId)) {
             throw new EntityNotFoundException("Workout con ID " + workoutId + " no existe.");
         }
 
         List<WorkoutExercise> workoutExercises = workoutExerciseRepository.findByWorkoutId(workoutId);
 
-        // Convertir cada entidad a DTO usando el mapper manual
         return workoutExercises.stream()
                 .map(workoutExerciseMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Crea una nueva relación entre un entrenamiento y un ejercicio.
+     * Los datos deben estar correctamente validados y deben existir las entidades referenciadas.
+     */
     @Transactional
     public WorkoutExerciseDTO createWorkoutExercise(@Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Creando nueva relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", dto.getWorkoutId(), dto.getExerciseId());
@@ -83,8 +100,13 @@ public class WorkoutExerciseService {
         }
     }
 
+    /**
+     * Actualiza los detalles de una relación existente (series, repeticiones, peso).
+     * Si no se encuentra la relación, lanza una excepción.
+     */
     @Transactional
-    public WorkoutExerciseDTO updateWorkoutExercise(@PathVariable Long workoutId, @PathVariable Long exerciseId, @Valid @RequestBody WorkoutExerciseDTO dto) {
+    public WorkoutExerciseDTO updateWorkoutExercise(@PathVariable Long workoutId, @PathVariable Long exerciseId,
+                                                    @Valid @RequestBody WorkoutExerciseDTO dto) {
         logger.info("Actualizando relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);
         WorkoutExercisePK id = new WorkoutExercisePK(workoutId, exerciseId);
 
@@ -98,6 +120,7 @@ public class WorkoutExerciseService {
             workoutExercise.setSets(dto.getSets());
             workoutExercise.setRepetitions(dto.getRepetitions());
             workoutExercise.setWeight(dto.getWeight());
+
             workoutExercise = workoutExerciseRepository.save(workoutExercise);
             logger.info("Workout-Exercise actualizado con éxito.");
             return workoutExerciseMapper.toDTO(workoutExercise);
@@ -107,6 +130,10 @@ public class WorkoutExerciseService {
         }
     }
 
+    /**
+     * Elimina una relación entre un entrenamiento y un ejercicio, identificada por sus IDs.
+     * Si no existe, lanza una excepción.
+     */
     @Transactional
     public void deleteWorkoutExercise(@PathVariable Long workoutId, @PathVariable Long exerciseId) {
         logger.info("Intentando eliminar relación Workout-Exercise: WorkoutID: {}, ExerciseID: {}", workoutId, exerciseId);

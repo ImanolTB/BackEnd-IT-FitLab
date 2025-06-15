@@ -20,13 +20,18 @@ import java.util.stream.Collectors;
 @Service
 public class FoodService {
 
+    // Logger para registrar información relevante y errores
     private static final Logger logger = LoggerFactory.getLogger(FoodService.class);
 
     @Autowired
     private FoodRepository foodRepository;
+
     @Autowired
     private FoodMapper foodMapper;
 
+    /**
+     * Devuelve una lista de todas las comidas almacenadas en la base de datos.
+     */
     public List<FoodDTO> getAllFoods() {
         try {
             logger.info("Recuperando todas las comidas.");
@@ -39,6 +44,10 @@ public class FoodService {
         }
     }
 
+    /**
+     * Devuelve una comida específica a partir de su ID.
+     * Si no se encuentra, lanza una excepción.
+     */
     public FoodDTO getFoodById(@PathVariable Long id) {
         try {
             logger.info("Buscando comida con ID: {}", id);
@@ -54,6 +63,9 @@ public class FoodService {
         }
     }
 
+    /**
+     * Devuelve una lista de comidas asociadas a una dieta y día de la semana concretos.
+     */
     public List<FoodDTO> getFoodsByDay(@PathVariable Long dietId, @PathVariable DayOfTheWeek dayOfWeek) {
         try {
             logger.info("Buscando comidas para la dieta {} y día {}.", dietId, dayOfWeek);
@@ -67,6 +79,10 @@ public class FoodService {
         }
     }
 
+    /**
+     * Crea una nueva comida a partir de los datos recibidos en un DTO.
+     * Retorna el DTO de la comida guardada.
+     */
     public FoodDTO createFood(@Valid @RequestBody FoodDTO dto) {
         try {
             logger.info("Creando nueva comida: {}", dto.getName());
@@ -80,6 +96,10 @@ public class FoodService {
         }
     }
 
+    /**
+     * Actualiza los datos de una comida existente, identificada por su ID.
+     * Si no se encuentra, lanza una excepción.
+     */
     public FoodDTO updateFood(@PathVariable Long id, @Valid @RequestBody FoodDTO dto) {
         try {
             logger.info("Actualizando comida con ID: {}", id);
@@ -88,11 +108,13 @@ public class FoodService {
                         logger.warn("Comida con ID {} no encontrada.", id);
                         return new IllegalArgumentException("Comida no encontrada");
                     });
+
             food.setName(dto.getName());
             food.setCalories(dto.getCalories());
             food.setProteins(dto.getProteins());
             food.setCarbohydrates(dto.getCarbohydrates());
             food.setFats(dto.getFats());
+
             Food updatedFood = foodRepository.save(food);
             logger.info("Comida con ID {} actualizada con éxito.", id);
             return foodMapper.toDTO(updatedFood);
@@ -102,6 +124,10 @@ public class FoodService {
         }
     }
 
+    /**
+     * Elimina una comida por su ID.
+     * Si no se encuentra, lanza una excepción.
+     */
     public void deleteFood(@PathVariable Long id) {
         try {
             logger.info("Eliminando comida con ID: {}", id);
