@@ -24,38 +24,49 @@ El backend está desarrollado con **Java 21 + Spring Boot**, expone una **API RE
 - Docker y Docker Compose (para la base de datos y despliegues)  
 
 ---
+▶️ Ejecución en desarrollo
 
-## ▶️ Ejecución en desarrollo
+1️⃣ Clonar el repositorio
 
-1. Clonar el repositorio
-   ```bash
-   git clone https://github.com/usuario/it-fitlab-backend.git
-   cd it-fitlab-backend
-Crear un archivo .env con las variables de entorno (DB, JWT, rutas de subida, etc.).
-👉 Recuerda añadir .env al .gitignore.
+git clone https://github.com/usuario/it-fitlab-backend.git
+cd it-fitlab-backend
 
-Levantar la base de datos con Docker:
 
-bash
-Copiar código
+2️⃣ Crear archivo .env con las variables de entorno
+Ejemplo de configuración mínima:
+
+DB_URL=jdbc:mysql://localhost:3306/itfitlab
+DB_USER=root
+DB_PASSWORD=1234
+
+JWT_SECRET=mySuperSecretKey
+UPLOAD_PATH=/app/videos
+
+
+⚠️ Recuerda añadir .env al .gitignore para no subirlo a GitHub.
+
+3️⃣ Levantar la base de datos con Docker
+
 docker compose up -d
-Arrancar el backend:
 
-bash
-Copiar código
+
+4️⃣ Arrancar el backend con Maven
+
 ./mvnw spring-boot:run
-Acceder a la API en:
 
-bash
-Copiar código
+
+5️⃣ Acceder a la API
+
 http://localhost:8080/api/v1
-📖 Documentación API
-Durante el desarrollo, la documentación Swagger está disponible en:
 
-bash
-Copiar código
+📖 Documentación API
+
+Durante el desarrollo, puedes usar Swagger UI:
+
 http://localhost:8080/swagger-ui/index.html
-En producción, esta documentación se deshabilita por motivos de seguridad.
+
+
+🔒 En producción, esta documentación se encuentra deshabilitada por seguridad.
 
 📂 Endpoints principales
 Usuarios → /api/v1/user/...
