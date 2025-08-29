@@ -88,13 +88,17 @@ Reseñas → /api/v1/reviews/...
 
 Auth → /api/v1/login
 
-🐳 Despliegue en producción
-Despliegue mediante Dockerfile multistage
+🌐 Entorno de producción
 
-Configuración con .env y keystore JWT (.jks)
+- VPS con Ubuntu Server 24.04 LTS
 
-Proxy inverso con Nginx y SSL (Let's Encrypt)
+- Despliegue con Dockerfiles multistage (Spring Boot, NodeJS, MariaDB, phpMyAdmin)
 
-Backend corriendo en contenedor aislado (sin exponer directamente el puerto 8080)
+- Nginx como proxy inverso + certificado SSL con Let's Encrypt
+
+- Frontend expuesto en puerto 3000
+
+- Backend en contenedor aislado (sin exponer 8080 directamente)
+  
 
 📜 Este proyecto se desarrolla como parte del TFG IT FitLab.
