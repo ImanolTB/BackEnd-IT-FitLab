@@ -36,10 +36,13 @@ cd it-fitlab-backend
 Ejemplo de configuración mínima:
 
 DB_URL=jdbc:mysql://localhost:3306/itfitlab
-DB_USER=root
-DB_PASSWORD=1234
 
-JWT_SECRET=mySuperSecretKey
+DB_USER=prueba
+
+DB_PASSWORD=1111
+
+JWT_SECRET=miClaveSecreta
+
 UPLOAD_PATH=/app/videos
 
 
